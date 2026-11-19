@@ -43,12 +43,12 @@ On a CPU the default fast mode takes a few minutes (see `demo/README.md`). Label
 | Path | Content |
 |---|---|
 | `demo/` | Web demo (static HTML/JS + Plotly), `serve_coad.py` (server + CoAD training on uploads), `coad_core.py` (model), `precompute.py`, precomputed data of 5 series, sample CSVs |
-| `CoAD_reimplementation.ipynb` | Reimplementation: paper mode and code mode (21 code-only details D1–D21), equivalence tests, experiments M1–M21 |
-| `CoAD_reproduction.ipynb` | Reproduction of the authors' public code on the 64 TSB-AD-U series |
-| `CoAD_experiments.ipynb` | Additional experiments |
-| `verify_reported_numbers.ipynb` | Recomputes every reported number from the raw result files |
-| `kaggle/` | Notebooks of individual experiments (M6–M11) prepared for Kaggle GPUs |
-| `table12/` | Notebooks and scripts reproducing Table 1 and Table 2 (4 parallel GPU sessions), result snapshots |
+| `notebooks/CoAD_reimplementation.ipynb` | Reimplementation: paper mode and code mode (21 code-only details D1–D21), equivalence tests, experiments M1–M21 |
+| `notebooks/CoAD_reproduction.ipynb` | Reproduction of the authors' public code on the 64 TSB-AD-U series |
+| `notebooks/CoAD_experiments.ipynb` | Additional experiments |
+| `notebooks/verify_reported_numbers.ipynb` | Recomputes every reported number from the raw result files |
+| `notebooks/kaggle/` | Notebooks of individual experiments (M6–M11) prepared for Kaggle GPUs |
+| `notebooks/table12/` | Notebooks and scripts reproducing Table 1 and Table 2 (4 parallel GPU sessions), result snapshots |
 | `tools/`, `experiment_results/` | Audit scripts and raw experiment outputs |
 | `docs/` | Report (`report.md`, `summary.md`, Word versions), demo specification and UI design |
 
