@@ -46,12 +46,11 @@ On a CPU the default fast mode takes a few minutes (see `demo/README.md`). Label
 | `CoAD_reimplementation.ipynb` | Reimplementation: paper mode and code mode (21 code-only details D1–D21), equivalence tests, experiments M1–M21 |
 | `CoAD_reproduction.ipynb` | Reproduction of the authors' public code on the 64 TSB-AD-U series |
 | `CoAD_experiments.ipynb` | Additional experiments |
-| `kiem_tra_so_lieu.ipynb` | Recomputes every reported number from the raw result files |
+| `verify_reported_numbers.ipynb` | Recomputes every reported number from the raw result files |
 | `kaggle/` | Notebooks of individual experiments (M6–M11) prepared for Kaggle GPUs |
 | `table12/` | Notebooks and scripts reproducing Table 1 and Table 2 (4 parallel GPU sessions), result snapshots |
-| `tools/`, `results_fix/` | Audit scripts and raw experiment outputs |
-| `10-report-en.md`, `09-summary-en.md`, `*_EN.docx` | Reports (English) |
-| `docs/` | Demo specification and UI design (English) |
+| `tools/`, `experiment_results/` | Audit scripts and raw experiment outputs |
+| `docs/` | Report (`report.md`, `summary.md`, Word versions), demo specification and UI design |
 
 ## Main findings (64 TSB-AD-U series, 3 seeds)
 
