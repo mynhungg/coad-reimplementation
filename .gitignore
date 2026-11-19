@@ -1,0 +1,32 @@
+# local Python environments (recreated by `uv run`)
+.venv*/
+demo/.venv*/
+__pycache__/
+*.pyc
+
+# series trained from a user's uploaded CSV (created at run time by serve_coad.py)
+demo/data/series_9*.json
+demo/data/series_9*.bin
+
+# backups, editor and OS files
+demo_v1_backup/
+.claude/
+*.tmp
+~$*
+.DS_Store
+Thumbs.db
+
+# scope of the public repository: English documents only, no paper PDF, no duplicate drafts
+0[1-8]-*.md
+04.md
+10-report-vi.md
+huong-dan-*.md
+ke-hoach-*.md
+so-lieu-final.md
+CoAD_Web_Demo_Error_Analysis_Spec.md
+CoAD_Web_UI_Design.md
+*_VI.docx
+*v2.docx
+*.pdf
+kiem-tra-so-lieu.ipynb
+kaggle/*.md

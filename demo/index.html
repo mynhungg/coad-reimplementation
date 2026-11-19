@@ -1,0 +1,85 @@
+﻿<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoAD Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=36">
+<script src="vendor/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+<header>
+  <button class="link" id="toggleSidebar" title="Ẩn/hiện cấu hình">☰</button>
+  <span class="brand">CoAD Lab</span>
+  <nav>
+    <button data-screen="data">Dữ liệu</button>
+    <button data-screen="series" class="active">Phân tích chuỗi</button>
+    <button data-screen="errors">Phân tích lỗi</button>
+    <button data-screen="results">Kết quả thực nghiệm</button>
+  </nav>
+  <span class="spacer"></span>
+  <button class="link" id="toggleExplain" title="Bật/tắt các câu giải thích cho người mới">Giải thích: Bật</button>
+  <button class="link" id="openTour">Hướng dẫn</button>
+  <button class="link" id="openAbout">Phạm vi &amp; tái lập</button>
+</header>
+
+<div class="toolbar" id="toolbar"></div>
+
+<div class="workspace" id="workspace">
+  <aside id="sidebar">
+    <section class="sb">
+      <div class="sbh"><span class="num">1</span>Chọn chuỗi dữ liệu</div>
+      <div id="cfgSeries" class="serieslist"></div>
+    </section>
+
+    <section class="sb">
+      <div class="sbh"><span class="num">2</span>Phương pháp</div>
+      <div id="cfgMethods"></div>
+    </section>
+
+    <section class="sb">
+      <div class="sbh"><span class="num">3</span>Ngưỡng báo động</div>
+      <div id="cfgPolicy" class="seg" role="radiogroup" aria-label="Ngưỡng báo động"></div>
+      <div id="policyHint" class="hint"></div>
+      <div id="interactiveBox" class="hidden">
+        <div id="sliders"></div>
+        <div class="note">Chỉ để khám phá: kết quả gắn nhãn <span class="badge inter">Interactive</span>, không ghi đè kết quả chính thức.</div>
+      </div>
+      <details class="adv"><summary>Thông số mô hình (chỉ đọc)</summary><dl class="kv" id="advanced"></dl></details>
+    </section>
+
+    <div class="applybar" id="applyBar">
+      <div id="pendingNote" class="pending hidden">● Có thay đổi chưa áp dụng</div>
+      <div class="row"><button class="btn" id="applyBtn">Áp dụng</button><button class="btn ghost" id="resetBtn">Đặt lại</button></div>
+    </div>
+
+    <section class="sb">
+      <div class="sbh"><span class="num">4</span>Dữ liệu của bạn <span class="opt">tùy chọn</span></div>
+      <label class="drop" id="dropZone"><input type="file" id="csvFile" accept=".csv,text/csv" hidden>
+        <span class="ic"></span><b>Kéo thả file CSV</b><span>hoặc bấm để chọn</span><small>cột thời gian · giá trị · nhãn (nếu có)</small></label>
+      <div class="samples"><span class="note">Dùng thử:</span>
+        <button class="chip" data-sample="NAB_nyc_taxi.csv" title="NAB: số lượt taxi New York, có nhãn">NYC taxi</button>
+        <button class="chip" data-sample="NAB_machine_temperature_system_failure.csv" title="NAB: nhiệt độ máy công nghiệp, có nhãn">Nhiệt độ máy</button>
+        <button class="chip" data-sample="sample_SED_234_valid.csv" title="Trích 6 000 điểm của TSB-AD SED 234">SED 234</button>
+        <button class="chip" data-sample="sample_with_errors.csv" title="File cố ý có lỗi định dạng">File lỗi</button></div>
+      <div id="uploadBox"></div>
+    </section>
+  </aside>
+
+  <main>
+    <section id="screen-data" class="hidden"></section>
+    <section id="screen-series"></section>
+    <section id="screen-errors" class="hidden"></section>
+    <section id="screen-results" class="hidden"></section>
+  </main>
+</div>
+
+<div class="modal" id="about"><div class="box" id="aboutBox"></div></div>
+
+<script src="rules.js?v=36"></script>
+<script src="illus.js?v=36"></script>
+<script src="app.js?v=36"></script>
+</body>
+</html>
