@@ -30,3 +30,6 @@ CoAD_Web_UI_Design.md
 *.pdf
 kiem-tra-so-lieu.ipynb
 kaggle/*.md
+
+# generates the Vietnamese number sheet (not part of the public repository)
+tools/make_final_md.py

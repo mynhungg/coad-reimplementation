@@ -27,13 +27,13 @@ powershell -ExecutionPolicy Bypass -File run.ps1      # Windows
 sh run.sh                                             # macOS / Linux
 ```
 
-The first start takes about a minute (package download). In the demo:
+The first start takes about a minute (package download). In the demo (the UI also has a Vietnamese mode):
 
-1. **Dữ liệu** (data): the datasets used, and analysis of an uploaded CSV (sampling, period, labels, insights);
-2. **Phân tích chuỗi** (series analysis): input, ground truth, alarms, anomaly score, reconstruction, a step-by-step
+1. **Data**: the datasets used, and analysis of an uploaded CSV (sampling, period, labels, insights);
+2. **Series analysis**: input, ground truth, alarms, anomaly score, reconstruction, a step-by-step
    view of how CoAD processes a window, and the signal trace of each event;
-3. **Phân tích lỗi** (error analysis): CoAD vs the improved `calibrated` scoring, event by event;
-4. **Kết quả thực nghiệm** (results): per-series and per-family deltas.
+3. **Error analysis**: CoAD vs the improved `calibrated` scoring, event by event;
+4. **Experiment results**: per-series and per-family deltas.
 
 Upload a CSV (`timestamp, value[, label]`, samples from NAB are included) to analyse it and train CoAD on it locally.
 On a CPU the default fast mode takes a few minutes (see `demo/README.md`). Labels are used only for evaluation.

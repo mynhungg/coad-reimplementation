@@ -1025,7 +1025,7 @@
     const u = ST.upload, box = $('#uploadBox');
     if (!u) { box.innerHTML = ''; return; }
     const opts = (sel, extra) => extra + u.header.map(h => `<option ${sel === h ? 'selected' : ''}>${esc(h)}</option>`).join('');
-    box.innerHTML = `<div class="note">${esc(u.name)} · ${u.rows.length} dòng</div>
+    box.innerHTML = `<div class="note"><b>${esc(u.name)}</b> · ${u.rows.length} dòng</div>
       <label>Cột thời gian</label><select id="uTs">${opts(u.ts, `<option value="__index__" ${u.ts === '__index__' ? 'selected' : ''}>(dùng index)</option>`)}</select>
       <label>Cột giá trị</label><select id="uVal">${opts(u.val, '')}</select>
       <label>Cột label (tùy chọn)</label><select id="uLab">${opts(u.lab, '<option value="">(không có)</option>')}</select>
@@ -1389,12 +1389,12 @@
     return {
       series: { group: m.group, file: m.file, family: m.family, length: m.length, n_train: m.n_train },
       run: m.run, result_mode: 'precomputed', calibration: m.calibration,
-      preprocessing: 'min-max theo phần train (loader TSB-AD của repo tác giả)',
+      preprocessing: "min-max on the training part (TSB-AD loader of the authors' code)",
       window: { T: m.window, patch: m.patch, inference_stride: m.inference_stride, train_stride: m.train_stride, valid_from: m.valid_from },
       smoothing: { type: 'moving average (np.convolve same)', width: m.period },
       methods: Object.fromEntries(activeMethods().map(k => [k, { threshold: ST.results[k].th, metrics_threshold_free: m.methods[k].metrics,
-        evaluator: 'evaluation/evaluator.py của repo CoAD (VUS từ TSB-AD)' }])),
-      threshold_policy: ST.cfg.policy, interactive: ST.cfg.policy === 'interactive', event_rules: R.RULES,
+        evaluator: 'evaluation/evaluator.py of the CoAD repository (VUS from TSB-AD)' }])),
+      threshold_policy: ST.cfg.policy, interactive: ST.cfg.policy === 'interactive', event_rules: Object.fromEntries(Object.entries(R.RULES).map(([k, v]) => [k, window.I18N ? I18N.tr(v) : v])),
       runtime_scope: m.run.inference_scope,
     };
   }

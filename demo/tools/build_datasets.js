@@ -1,4 +1,4 @@
-// Builds data/datasets.json for the "Dữ liệu" screen: per-series metadata of the paper's 64 TSB-AD series and of the
+// Builds data/datasets.json for the "Data" screen: per-series metadata of the paper's 64 TSB-AD series and of the
 // 60-series external set, plus a KDD21 summary. Reads the raw TSB-AD-U CSVs (label column) and all_length.csv.
 // usage: node tools/build_datasets.js <TSB-AD raw dir> <UCR all_length.csv> <m13 external csv dir>
 const fs = require('fs'), path = require('path');
