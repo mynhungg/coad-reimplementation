@@ -492,3 +492,20 @@ details.explain > summary { padding: 2px 0; font-weight: 500; color: var(--muted
 
 .upbanner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 1px solid var(--border); background: var(--panel); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; font-size: 13.5px; }
 .upbanner .btn { margin-left: auto; }
+
+/* ===== responsive fix: header never wraps, sidebar is a closed drawer on narrow screens ===== */
+header { gap: 12px; min-width: 0; }
+header nav { min-width: 0; overflow-x: auto; scrollbar-width: none; flex: 0 1 auto; }
+header nav::-webkit-scrollbar { display: none; }
+header nav button, header .link, header .brand { white-space: nowrap; flex: none; }
+@media (max-width: 1100px) {
+  header { gap: 6px; padding: 0 10px; }
+  header nav button { padding: 8px 8px; }
+  header .link { padding: 6px 6px; }
+}
+@media (max-width: 860px) {
+  .workspace aside, .workspace.collapsed aside { display: none; }
+  .workspace.open aside { display: block; position: fixed; left: 0; top: 56px; bottom: 0; width: min(300px, 86vw); height: auto; z-index: 40; box-shadow: 4px 0 18px rgba(15,23,42,.18); }
+  .workspace.open::before { content: ''; position: fixed; inset: 56px 0 0 0; background: rgba(15,23,42,.25); z-index: 35; }
+  #openAbout { display: none; }
+}

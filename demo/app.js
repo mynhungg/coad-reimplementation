@@ -1461,7 +1461,8 @@
   }
 
   document.querySelectorAll('header nav button').forEach(b => b.onclick = () => go(b.dataset.screen));
-  $('#toggleSidebar').onclick = () => $('#workspace').classList.toggle('collapsed');
+  $('#toggleSidebar').onclick = () => { const w = $('#workspace'); w.classList.toggle(innerWidth <= 860 ? 'open' : 'collapsed'); };
+  $('#workspace').addEventListener('click', e => { const w = $('#workspace'); if (w.classList.contains('open') && (e.target === w || e.target.closest('#applyBtn'))) w.classList.remove('open'); });
   $('#openAbout').onclick = () => { renderAbout(); $('#about').classList.add('open'); };
   $('#about').onclick = e => { if (e.target.id === 'about') $('#about').classList.remove('open'); };
 

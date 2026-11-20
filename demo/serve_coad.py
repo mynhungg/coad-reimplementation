@@ -182,6 +182,11 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **k):
         super().__init__(*a, directory=str(HERE), **k)
 
+    def end_headers(self):  # pages always revalidate, so a changed index.html (new ?v= asset links) is picked up
+        if self.path.split('?')[0].endswith(('/', '.html')):
+            self.send_header('Cache-Control', 'no-cache')
+        super().end_headers()
+
     def _json(self, obj, code=200):
         body = json.dumps(obj).encode()
         self.send_response(code)
