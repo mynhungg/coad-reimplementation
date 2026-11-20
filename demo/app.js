@@ -121,6 +121,7 @@
     margin: { l: 56, r: 16, t: 8, b: 28 }, paper_bgcolor: '#fff', plot_bgcolor: '#fff', hovermode: 'x',
     font: { family: 'Be Vietnam Pro, Segoe UI, sans-serif', size: 12, color: '#0F172A' },
     legend: { orientation: 'h', y: 1.12, x: 0, font: { size: 12 } }, dragmode: 'zoom',
+    modebar: { orientation: 'v', bgcolor: 'rgba(255,255,255,.85)' },   // vertical, so it never sits on the legend row
   };
   const CONF = { displaylogo: false, responsive: true, modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
                  toImageButtonOptions: { format: 'png', scale: 2 } };

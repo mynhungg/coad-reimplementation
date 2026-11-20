@@ -49,9 +49,30 @@
   }
   function setLang(l) { try { localStorage.setItem(KEY, l); } catch (e) { /* storage blocked */ } location.reload(); }
 
+  /* Plotly measures legend and label widths when it draws, so translating its SVG afterwards makes long English labels
+     overlap. Translate the figure spec itself before Plotly sees it. */
+  const PKEYS = new Set(['name', 'text', 'title', 'ticktext', 'hovertext', 'hovertemplate']);
+  function trFig(o, k) {
+    if (typeof o === 'string') return PKEYS.has(k) ? tr(o) : o;
+    if (Array.isArray(o)) return (PKEYS.has(k) && o.length && typeof o[0] === 'string') ? o.map(x => tr(x)) : o.map(x => trFig(x, k));
+    if (!o || typeof o !== 'object' || ArrayBuffer.isView(o)) return o;
+    const out = {}; for (const key in o) out[key] = trFig(o[key], PKEYS.has(key) ? key : (k === 'title' ? 'title' : key)); return out;
+  }
+  function patchPlotly() {
+    if (!window.Plotly || Plotly.__i18n) return;
+    for (const fn of ['newPlot', 'react']) {
+      const orig = Plotly[fn];
+      Plotly[fn] = function (el, data, layout, cfg) {
+        if (dict && data && !Array.isArray(data) && typeof data === 'object' && data.data) return orig.call(this, el, trFig(data));
+        return orig.call(this, el, dict ? trFig(data) : data, dict ? trFig(layout) : layout, cfg);
+      };
+    }
+    Plotly.__i18n = true;
+  }
+
   window.I18N = { lang: () => lang, setLang, missing: () => [...seen].sort(), tr: s => tr(s) };
   if (lang === 'en') {
-    fetch('i18n_en.json?v=4').then(r => r.json()).then(d => { dict = d; start(); }).catch(() => { /* no dictionary: stay Vietnamese */ });
+    fetch('i18n_en.json?v=4').then(r => r.json()).then(d => { dict = d; patchPlotly(); start(); }).catch(() => { /* no dictionary: stay Vietnamese */ });
   }
   document.addEventListener('DOMContentLoaded', () => {
     const b = document.getElementById('langBtn');

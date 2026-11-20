@@ -185,7 +185,7 @@ How to read it:
 - **Paper vs authors' code:** the authors' own code is about 3 points below the paper on F1 and AUC-PR, but about 2 points above it on R-AUC-PR and VUS-PR.
 - **Extended build vs authors' code:** no difference on any of the four metrics (paired Wilcoxon over 64 series). This build reproduces the code.
 - **Main build vs paper:** its closeness on VUS-PR and R-AUC-PR (about 1 SD) is partly a coincidence. The main build is about 3 points below the authors' code on these metrics (it lacks the training details, Section 5.3), while the authors' code is about 2 points above the paper.
-- **KDD21 as a control:** the same authors' code, run on 246/250 KDD21 series, matches Table 1 on all four metrics (gap < 0.3, Section 6.5). The gap is therefore confined to the TSB-AD part of Table 1.
+- **KDD21 as a control:** the same authors' code, run on all 250 KDD21 series, matches Table 1 on all four metrics (gap < 0.3, Section 6.5). The gap is therefore confined to the TSB-AD part of Table 1.
 
 We also ruled out our evaluation pipeline. Rerunning four Table 1 baselines through the same pipeline reproduces the paper:
 
@@ -338,14 +338,14 @@ The previous sections checked only the CoAD row. This section reruns the other r
 - min–max scaling on the training part, as in the authors' TSB-AD loader (an assumption, since no preprocessing code is published);
 - checked against `all_length.csv`: **250/250 series match exactly** in train, test and anomaly length. This required two special cases that the file reveals: series 239–241 (900,000 points) are downsampled by 10, and the 1-point anomalies of series 079, 108 and 187 are widened to 3 points.
 
-**CoAD on KDD21** (authors' code, settings of `run_all_CoAD.sh`, 246/250 series; the last 4 are still running):
+**CoAD on KDD21** (authors' code, settings of `run_all_CoAD.sh`, all 250 series):
 
 | Metric | Table 1 | Authors' code | Difference |
 |---|---|---|---|
-| F1 | 52.82 | 52.70 | −0.12 |
-| AUC-PR | 48.10 | 47.96 | −0.14 |
-| R-AUC-PR | 46.35 | 46.58 | +0.23 |
-| VUS-PR | 45.67 | 45.94 | +0.27 |
+| F1 | 52.82 | 52.53 | −0.29 |
+| AUC-PR | 48.10 | 47.82 | −0.28 |
+| R-AUC-PR | 46.35 | 46.37 | +0.02 |
+| VUS-PR | 45.67 | 45.75 | +0.08 |
 
 **The KDD21 column of Table 1 reproduces**: all four metrics are within 0.3 points. This is an important control for Section 5.1. The same code matches on KDD21 but is 3–4 F1/AUC-PR points lower on TSB-AD. The gap therefore lies in the TSB-AD part of Table 1 only, not in the model or the evaluator.
 
@@ -382,7 +382,8 @@ Observations:
 
 **7 data-mining baselines.**
 - On TSB-AD (64 series, run earlier): SAND 31.06 (Table 1: 31.05), Sub-PCA 23.92 (23.85), DAMP 12.99 (12.60), MP 29.48 (28.94), Series2Graph 31.44 (29.57), KMeansAD 41.01 (36.81), KShapeAD 35.86 (31.27). Five match within 2 points; KMeansAD and KShapeAD are about 4 points above the paper.
-- On KDD21: about 75 of 250 series are done (the shortest series run first), too few to compare. Series2Graph failed under NumPy 2 and has been patched.
+- On KDD21 (all 250 series; Matrix Profile 248, two series fail with a numba CUDA error): KShapeAD 40.10 (Table 1: 39.02), SAND 35.99 (33.78), KMeansAD 33.97 (33.20), Series2Graph 23.12 (24.81), Sub-PCA 11.70 (13.17), DAMP 19.92 (24.18), Matrix Profile 39.20 (24.13). Five match within 2.3 points; DAMP is 4.3 below and Matrix Profile 15.1 above the paper. The same MP and DAMP code matches Table 1 on TSB-AD, so the KDD21 differences most likely come from settings the paper does not report (e.g. the window used on KDD21); we did not investigate further.
+- **Ranking:** CoAD stays first on both benchmarks with the rerun numbers (KDD21: 45.75 vs 40.10 for KShapeAD; TSB-AD: 41.70 vs 41.01 for KMeansAD), but its lead on TSB-AD is much smaller than in Table 1 (0.7 instead of 3.0 VUS-PR points).
 
 **Table 2 (ablations).** Besides the three variants in Section 6.2, the notebooks are ready to run the 9 variants of the authors' code on KDD21 and the 5 rows the code lacks. These five follow the definitions in the paper's Appendix G: OE alone (Time), OE alone (Time + Frequency), MAE alone (Random), MAE alone (Grating), Guide w/o Score. This part has not been run yet.
 
@@ -392,9 +393,11 @@ Observations:
 |---|---|---|
 | Table 1, R-AUC-PR and VUS-PR (TSB-AD) | ✅ Close (main build, within about 1 SD) | Partly through offsetting family differences |
 | Table 1, F1 and AUC-PR (TSB-AD) | ❌ 3–4 points lower | The authors' code shows the same gap; not the pipeline, not smoothing, not early stopping |
-| Table 1, CoAD on KDD21 | ✅ Match (authors' code, 246/250 series, < 0.3 on all 4 metrics) | The gap exists only in the TSB-AD part |
+| Table 1, CoAD on KDD21 | ✅ Match (authors' code, 250/250 series, < 0.3 on all 4 metrics) | The gap exists only in the TSB-AD part |
 | Table 1, 14 deep baselines | 8/14 match on both benchmarks | Match when trained for 1 epoch as in the authors' script; gaps for models that need long training |
 | Table 1, 7 data-mining baselines (TSB-AD) | 5/7 match; KMeansAD and KShapeAD about 4 points higher | Same pipeline as the authors |
+| Table 1, 7 data-mining baselines (KDD21) | 5/7 match; DAMP 4.3 lower, Matrix Profile 15.1 higher | KDD21 settings of MP/DAMP not reported |
+| Table 1, ranking | ✅ CoAD first on both benchmarks | Lead on TSB-AD shrinks to 0.7 VUS-PR over KMeansAD |
 | Table 2: mean fusion | ✅ Same direction, similar size | Not significant on VUS-PR (p = 0.061) |
 | Table 2: hard mask | Same direction, much smaller | Indistinguishable from seed noise |
 | Table 2: no frequency branch | ❌ Opposite (+1.91) | The frequency branch does not help on TSB-AD |
@@ -592,9 +595,9 @@ We built a web demo (folder `demo/`) following the specification `CoAD_Web_Demo_
 - **The paper alone is not enough to rebuild CoAD.** The mean matches partly through offsetting families. On MGAB the paper-based build scores 18 against 45, because the training procedure is not described.
 - **Extended experiments:**
   - score smoothing and early stopping are ruled out as causes of the gap to Table 1;
-  - **the KDD21 column of Table 1 reproduces** with the authors' code on 246/250 series (VUS-PR 45.94 vs 45.67), so the gap lies only in the TSB-AD part;
+  - **the KDD21 column of Table 1 reproduces** with the authors' code on all 250 series (VUS-PR 45.75 vs 45.67), so the gap lies only in the TSB-AD part;
   - the no-frequency-branch ablation goes the opposite way to Table 2.
-- **Baselines in Table 1:** 8 of 14 deep-learning baselines match the paper when run exactly as the authors' script, which trains for 1 epoch, although the paper states early stopping and 5 seeds. Baselines that need long training are far below the paper. 5 of 7 data-mining baselines match on TSB-AD.
+- **Baselines in Table 1:** 8 of 14 deep-learning baselines match the paper when run exactly as the authors' script, which trains for 1 epoch, although the paper states early stopping and 5 seeds. Baselines that need long training are far below the paper. 5 of 7 data-mining baselines match on each benchmark. CoAD stays first on both, but only 0.7 VUS-PR ahead of KMeansAD on TSB-AD.
 - **Error analysis:** most of the signal is lost at score smoothing, not in the cooperation mechanism. The rest are anomalies with no signal in either branch.
 - **Baselines:** CoAD is not significantly better than KMeans on the 64 series, and it trails KMeans on 58 external series.
 - **Improvements:** scoring changes gain on the paper's data but do not generalise to 12 new families. Up-weighting reconstruction is the only change that consistently beats `calibrated`.
@@ -611,7 +614,7 @@ We built a web demo (folder `demo/`) following the specification `CoAD_Web_Demo_
   - the difference groups and early stopping were tested on the 9 MGAB series only;
   - KDD21 is rebuilt from the original archive; the min–max scaling and the downsampling of series 239–241 are assumptions (lengths match 250/250);
   - the early-stopping rule is our choice, since the paper does not describe it.
-- **Unfinished parts of Tables 1 and 2:** data-mining baselines on KDD21 (about 75/250 series), 4 CoAD series on KDD21, deep baselines with default epochs, and the KDD21 ablations together with the 5 Table 2 rows the code lacks. MMA, AnomalyBERT and TriAD have no code and cannot be run.
+- **Unfinished parts of Tables 1 and 2:** deep baselines with default epochs, and the KDD21 ablations together with the 5 Table 2 rows the code lacks. MMA, AnomalyBERT and TriAD have no code and cannot be run.
 - **Error analysis:** thresholds use labels (diagnosis only); spike tests use synthetic anomalies.
 - **Data reuse:** the 64 series were used across many experiments. The design/confirmation protocol applies only to the improvement experiments.
 - **External baselines:** on the 60 external series, KMeans and KShapeAD only.
