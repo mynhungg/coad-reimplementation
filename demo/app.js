@@ -217,6 +217,9 @@
       Plotly.react(g, g._build(), lay);
     }), 150);
   }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
+    document.querySelectorAll('.js-plotly-plot').forEach(g => { try { Plotly.relayout(g, {}); } catch (e) { /* not drawn yet */ } });
+  });
   function plot(div, build, layout, opts = {}) {
     const traces = typeof build === 'function' ? build() : build;
     div._build = typeof build === 'function' ? build : null;
@@ -424,7 +427,7 @@
       margin: Object.assign({}, BASE.margin, { l: 92 }),
       yaxis: { domain: [0.28, 1], title: { text: 'input', font: { size: 11 } } },
       yaxis2: { domain: [0.28, 1], overlaying: 'y', range: [0, 1], visible: false, fixedrange: true },
-      yaxis3: { domain: [0, 0.2], range: [0.4, ms.length + 0.6], tickvals: ms.map((_, k) => k + 1), ticktext: ms.map(m => METHOD[m].label), fixedrange: true, showgrid: false },
+      yaxis3: { domain: [0, 0.2], range: [0.4, ms.length + 0.6], tickvals: ms.map((_, k) => k + 1), ticktext: ms.map(m => METHOD[m].label), fixedrange: true, showgrid: false, automargin: true },
     }, opts.layout || {}), { inspect: !opts.noInspect, link: opts.link });
   }
 
@@ -443,7 +446,7 @@
     ms.forEach((m, k) => {
       const ya = k === 0 ? 'y' : 'y' + (k + 1), key = k === 0 ? 'yaxis' : 'yaxis' + (k + 1);
       const top = 1 - k * (h + gap), dom = [Math.max(0, top - h), top];
-      layout[key] = { domain: dom, title: { text: METHOD[m].label, font: { size: 11, color: METHOD[m].color } }, zeroline: false };
+      layout[key] = { domain: dom, title: { text: METHOD[m].label, font: { size: 11, color: METHOD[m].color } }, zeroline: false, automargin: true };
       const th = ST.results[m].th.value;
       layout.shapes.push({ type: 'line', xref: 'paper', x0: 0, x1: 1, yref: ya, y0: th, y1: th, line: { color: '#64748B', width: 1, dash: 'dash' } });
       layout.shapes.push({ type: 'rect', xref: 'x', x0: 0, x1: vf, yref: ya + ' domain', y0: 0, y1: 1, fillcolor: 'rgba(100,116,139,.12)', line: { width: 0 } });
@@ -1455,6 +1458,8 @@
     let first = null;
     const order = [237, ...demo.filter(g => g !== 237)];
     for (const g of order) { if (!demo.includes(g)) continue; try { await loadJSON(`data/series_${g}.json`); first = g; break; } catch (e) { ST.cache[g] = null; } }
+    // chart legends are laid out with the font loaded at draw time: wait (briefly) for the web font first
+    if (document.fonts && document.fonts.load) await Promise.race([document.fonts.load('12px "Be Vietnam Pro"'), new Promise(r => setTimeout(r, 1500))]).catch(() => {});
     if (first !== null) {
       await selectSeries(first);
       if (!store.get('coad-tour-seen', false)) setTimeout(tourStart, 800);   // first visit: guided tour
