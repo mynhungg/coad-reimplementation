@@ -818,6 +818,20 @@
     const famRows = fams.map(fm => { const rr = rows.filter(r => r.family === fm); return { fm, n: rr.length, coad: mean(rr.map(r => r[k + '_coad'])), cal: mean(rr.map(r => r[k + '_cal'])) }; }).filter(x => x.n);
     const mlabel = { VUS_PR: 'VUS-PR', auc_prc: 'AUC-PR', R_AUC_PR: 'R-AUC-PR', f1_score: 'F1' };
     const mC = mean(rows.map(r => r[k + '_coad'])), mK = mean(rows.map(r => r[k + '_cal'])), mD = mean(rows.map(r => r.delta)), nn = Math.max(1, rows.length);
+    // overview: every metric at once, on the same family / split filter
+    const ov = Object.entries(mlabel).map(([mk, ml]) => {
+      const rr = all.filter(r => r[mk + '_cal'] !== null && r[mk + '_cal'] !== undefined && r[mk + '_coad'] !== null && r[mk + '_coad'] !== undefined);
+      const d = rr.map(r => r[mk + '_cal'] - r[mk + '_coad']);
+      return { mk, ml, n: rr.length, coad: mean(rr.map(r => r[mk + '_coad'])), cal: mean(rr.map(r => r[mk + '_cal'])), d: mean(d),
+               up: d.filter(x => x > tol).length, down: d.filter(x => x < -tol).length,
+               km: mk === 'VUS_PR' ? mean(rr.filter(r => r.VUS_PR_kmeans !== null && r.VUS_PR_kmeans !== undefined).map(r => r.VUS_PR_kmeans)) : NaN };
+    });
+    const ovHTML = `<div class="panel"><div class="ph"><h2>Tổng quan · cả 4 metric</h2><span class="note">${f.split === 'confirmation' ? 'tập xác nhận' : f.split === 'design' ? 'tập thiết kế' : 'mọi tập'}${f.family !== 'all' ? ' · ' + f.family : ''} · trung bình các series · bấm một dòng để xem chi tiết metric đó</span></div>
+      <div class="pb"><table class="ovt"><thead><tr><th>Metric</th><th class="r">Series</th><th class="r">CoAD gốc</th><th class="r">Our Improvement</th><th class="r">Δ</th><th class="r">Tăng · giảm · hòa</th><th class="r">KMeansAD</th></tr></thead><tbody>
+      ${ov.map(o => `<tr data-mk="${o.mk}" class="${o.mk === k ? 'sel' : ''}"><td><b>${o.ml}</b></td><td class="r">${o.n || '—'}</td><td class="r">${o.n ? pts(o.coad) : 'N/A'}</td><td class="r">${o.n ? pts(o.cal) : 'N/A'}</td>
+        <td class="r" style="color:${o.d > tol ? 'var(--ok)' : o.d < -tol ? 'var(--bad)' : 'inherit'};font-weight:600">${o.n ? (o.d >= 0 ? '+' : '') + pts(o.d) : '—'}</td>
+        <td class="r">${o.n ? `<span style="color:var(--ok)">▲${o.up}</span> · <span style="color:var(--bad)">▼${o.down}</span> · =${o.n - o.up - o.down}` : '—'}</td><td class="r">${isNaN(o.km) ? '—' : pts(o.km)}</td></tr>`).join('')}
+      </tbody></table><div class="note" style="margin-top:6px">KMeansAD chỉ có VUS-PR (một lần chạy, không phụ thuộc seed).</div></div></div>`;
     root.innerHTML = `
       <div class="panel"><div class="ph"><h2>Our Improvement so với CoAD gốc</h2>${info(B.aggregation)}</div>
         <div class="pb"><div class="filters">
@@ -827,6 +841,7 @@
           <div><label>Sắp xếp</label><select id="fSort"><option value="delta">Theo delta</option><option value="family" ${f.sort === 'family' ? 'selected' : ''}>Theo family</option></select></div></div>
           ${missing.length ? `<div class="warnbox" style="margin-top:10px">${missing.length} series N/A (không tính) ${info(`Không có ${mlabel[k]} của Our Improvement: ` + (missing.every(r => r.split === 'design') ? 'tập thiết kế chỉ được chấm nhanh bằng AUC-PR riêng của M11 lúc chọn phương án, không chạy evaluator đầy đủ.' : 'thiếu kết quả.') + ' Chọn Tập = Xác nhận để xem phần kiểm tra độc lập.')}</div>` : ''}
           <div class="note" style="margin-top:8px">Trung bình 3 seed. Trên 60 series của 12 family khác, Our Improvement không hơn CoAD ổn định (báo cáo mục 9). ${info(B.source.coad + '; ' + B.source.calibrated + '. ' + B.source.split + '.')}</div></div></div>
+      ${ovHTML}
       <div class="kpis">
         <div class="kpi"><div class="v">${rows.length}</div><div class="l">series có ${mlabel[k]} · ${f.split === 'confirmation' ? 'tập xác nhận' : f.split === 'design' ? 'tập thiết kế' : 'mọi tập'}</div></div>
         <div class="kpi accent" style="--c:${METHOD.coad.color}"><div class="v">${pts(mC)}</div><div class="l">CoAD gốc (trung bình)</div></div>
@@ -848,6 +863,7 @@
     $('#fSplit').onchange = e => { f.split = e.target.value; renderResults(); };
     $('#fMetric').onchange = e => { f.metric = e.target.value; renderResults(); };
     $('#fSort').onchange = e => { f.sort = e.target.value; renderResults(); };
+    root.querySelectorAll('.ovt tr[data-mk]').forEach(tr => tr.onclick = () => { f.metric = tr.dataset.mk; renderResults(); });
     root.querySelectorAll('tr[data-g], .gal').forEach(tr => tr.onclick = () => { const r = B.rows.find(x => x.group === +tr.dataset.g); if (r && r.demo) { selectSeries(r.group); go('series'); } });
     const ys = rows.map(r => `${r.group} ${r.family}${r.split === 'design' ? ' (TK)' : ''}`);
     Plotly.newPlot($('#cDelta'), [{ type: 'bar', orientation: 'h', y: ys, x: rows.map(r => 100 * r.delta), text: rows.map(r => (r.delta >= 0 ? '+' : '') + (100 * r.delta).toFixed(2)),

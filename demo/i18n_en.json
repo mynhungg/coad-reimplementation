@@ -738,5 +738,15 @@
 "# · chỉ có kết quả tổng hợp (tab Kết quả thực nghiệm)": "# · aggregate results only (Experiment results tab)",
 "# · chỉ có kết quả tổng hợp, không có checkpoint trong demo": "# · aggregate results only, no checkpoint in the demo",
 "đang xem": "viewing",
-"mở phân tích →": "open analysis →"
+"mở phân tích →": "open analysis →",
+"Tổng quan · cả # metric": "Overview · all # metrics",
+"Tăng · giảm · hòa": "Up · down · tie",
+"tập xác nhận": "confirmation set",
+"tập thiết kế": "design set",
+"mọi tập": "all sets",
+" · trung bình các series · bấm một dòng để xem chi tiết metric đó": " · mean over series · click a row to see that metric in detail",
+"KMeansAD chỉ có VUS-PR (một lần chạy, không phụ thuộc seed).": "KMeansAD has VUS-PR only (one run, no seed dependence).",
+"tập xác nhận · trung bình các series · bấm một dòng để xem chi tiết metric đó": "confirmation set · mean over series · click a row to see that metric in detail",
+"tập thiết kế · trung bình các series · bấm một dòng để xem chi tiết metric đó": "design set · mean over series · click a row to see that metric in detail",
+"mọi tập · trung bình các series · bấm một dòng để xem chi tiết metric đó": "all sets · mean over series · click a row to see that metric in detail"
 }

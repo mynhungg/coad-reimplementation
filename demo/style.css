@@ -539,3 +539,5 @@ aside#sidebar .sbh { font-size: 13px; margin-bottom: 6px; }
 .workspace.noside { grid-template-columns: minmax(0, 1fr) !important; }
 .workspace.noside aside { display: none !important; }
 .srow.cur { background: #EFF6FF; box-shadow: inset 3px 0 0 var(--primary); }
+
+.ovt tr[data-mk] { cursor: pointer; } .ovt tr[data-mk]:hover { background: var(--chip); } .ovt tr.sel { background: #EFF6FF; }
