@@ -129,6 +129,10 @@
     IOPS: ['', 'Chỉ số dịch vụ web', 'số liệu vận hành (KPI) của dịch vụ Internet; bất thường là sự cố'],
     TODS: ['', 'Dữ liệu tổng hợp', 'chuỗi tạo nhân tạo, bất thường được chèn có chủ đích'],
     MGAB: ['', 'Chuỗi hỗn loạn tổng hợp', 'chuỗi Mackey–Glass nhân tạo, bất thường khó thấy bằng mắt'],
+    WSD: ['', 'Chỉ số máy chủ web', 'số liệu vận hành máy chủ web (KPI)'],
+    SMD: ['', 'Chỉ số máy chủ', 'số liệu giám sát máy chủ trong trung tâm dữ liệu'],
+    NAB: ['', 'Dữ liệu thực tế (NAB)', 'chuỗi thực tế từ bộ Numenta Anomaly Benchmark'],
+    NEK: ['', 'Chỉ số mạng', 'số liệu vận hành mạng'],
   };
   const family = f => FAMILY[f] || ['', f, 'chuỗi thời gian đơn biến'];
 

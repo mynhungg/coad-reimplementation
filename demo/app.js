@@ -267,7 +267,10 @@
       const tagText = tag ? { success: 'Impr. tốt hơn', failure: 'Impr. kém (seed demo)', representative: 'Đại diện' }[tag] : '';
       return `<button class="srow1 ${r.group === ST.group ? 'sel' : ''}" data-g="${r.group}" ${missing ? 'disabled title="Chưa có dữ liệu tính sẵn"' : ''}>
         <span class="nm">${r.family} ${r.group}</span><span class="sub">${name}</span>${tag ? `<i class="tdot ${tag}" title="${tagText}"></i>` : ''}</button>`;
-    }).join('') + `<div class="tlegend"><span><i class="tdot success"></i>Impr. tốt hơn</span><span><i class="tdot failure"></i>Impr. kém</span><span><i class="tdot representative"></i>Đại diện</span></div>`;
+    }).join('') + ((ST.bench.external_demo || []).length ? '<div class="sgroup">Ngoài paper</div>' + ST.bench.external_demo.map(r => {
+      const [, name] = IL.family(r.family), tagText = { success: 'Impr. tốt hơn', failure: 'Impr. kém (seed demo)' }[r.tag];
+      return `<button class="srow1 ${r.group === ST.group ? 'sel' : ''}" data-g="${r.group}"><span class="nm">${r.family} ${r.group}</span><span class="sub">${name}</span><i class="tdot ${r.tag}" title="${tagText}"></i></button>`;
+    }).join('') : '') + `<div class="tlegend"><span><i class="tdot success"></i>Impr. tốt hơn</span><span><i class="tdot failure"></i>Impr. kém</span><span><i class="tdot representative"></i>Đại diện</span></div>`;
     box.querySelectorAll('.srow1').forEach(b => b.onclick = () => { if (+b.dataset.g !== ST.group) { b.classList.add('loading'); selectSeries(+b.dataset.g); } });
     if (!ST.data) { $('#cfgMethods').innerHTML = ''; return; }
     const m = ST.data.meta;
@@ -751,14 +754,16 @@
     if (ST.ea.filter === 'fa' || ST.ea.filter === 'missed' || ST.ea.filter === 'partial') ST.ea.filter = 'all';
     const list = filtered(c), flat = list.gt;
     if (!flat.find(x => x.key === ST.ea.key)) { const pick = flat.find(x => x.type === 'gt' && x.cmp.kind !== 'both_hit') || flat[0]; ST.ea.key = pick ? pick.key : null; }
-    const tile = (f, n, label, sub, cls) => `<button class="mtile ${cls} ${ST.ea.filter === f ? 'on' : ''}" data-f="${f}" ${n === 0 ? 'disabled' : ''}><b>${n}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ''}</button>`;
+    const tile = (f, n, label, sub, cls) => `<button class="ef ${cls} ${ST.ea.filter === f ? 'on' : ''}" data-f="${f}" title="${sub}" ${n === 0 ? 'disabled' : ''}><i></i>${label}<b>${n}</b></button>`;
     root.innerHTML = `
       <div class="ecmp one">
         <div class="panel"><div class="ph"><h2>${c.gt.length} sự kiện thật</h2>${info(R.RULES.comparison + ' Ngưỡng: ' + POLICY_LABEL[ST.cfg.policy] + '.')}</div>
-          <div class="pb"><div class="mgrid">
-            <span></span><span class="mh" style="color:${METHOD.calibrated.color}">Our Improvement ✓ bắt</span><span class="mh" style="color:${METHOD.calibrated.color}">Our Improvement ✗ sót</span>
-            <span class="mh rh" style="color:${METHOD.coad.color}">CoAD ✓ bắt</span>${tile('both_hit', cnt.both_hit, 'cả hai bắt', '', 'neutral')}${tile('lost', cnt.lost, 'mới bỏ sót', 'cải tiến làm kém đi', 'bad')}
-            <span class="mh rh" style="color:${METHOD.coad.color}">CoAD ✗ sót</span>${tile('recovered', cnt.recovered, 'được cứu', 'cải tiến sửa được', 'good')}${tile('both_missed', cnt.both_missed, 'cả hai sót', '', 'neutral')}
+          <div class="pb"><div class="efilter">
+            ${tile('all', c.gt.length, 'Tất cả', 'Mọi sự kiện thật', 'neutral')}
+            ${tile('both_hit', cnt.both_hit, 'Cả hai bắt', 'CoAD gốc và Our Improvement đều bắt được', 'neutral')}
+            ${tile('recovered', cnt.recovered, 'Được cứu', 'CoAD gốc bỏ sót, Our Improvement bắt được', 'good')}
+            ${tile('lost', cnt.lost, 'Mới bỏ sót', 'CoAD gốc bắt được, Our Improvement bỏ sót', 'bad')}
+            ${tile('both_missed', cnt.both_missed, 'Cả hai sót', 'Cả hai đều bỏ sót', 'neutral')}
           </div></div></div>
       </div>
       <div id="caseDetail"></div>`;
@@ -833,10 +838,10 @@
                km: mean(rr.filter(r => r[mk + '_kmeans'] !== null && r[mk + '_kmeans'] !== undefined).map(r => r[mk + '_kmeans'])) };
     });
     const ovHTML = `<div class="panel"><div class="ph"><h2>Tổng quan · cả 4 metric</h2><span class="note">${f.split === 'confirmation' ? 'tập xác nhận' : f.split === 'design' ? 'tập thiết kế' : 'mọi tập'}${f.family !== 'all' ? ' · ' + f.family : ''} · trung bình các series · bấm một dòng để xem chi tiết metric đó</span></div>
-      <div class="pb"><table class="ovt"><thead><tr><th>Metric</th><th class="r">Series</th><th class="r">CoAD gốc</th><th class="r">Our Improvement</th><th class="r">Δ</th><th class="r">Tăng · giảm · hòa</th><th class="r">KMeansAD</th></tr></thead><tbody>
+      <div class="pb"><table class="ovt"><thead><tr><th>Metric</th><th class="r">Series</th><th class="r">CoAD gốc</th><th class="r">Our Improvement</th><th class="r">Δ</th><th class="r">Số series: cải tiến tốt hơn / kém hơn / như nhau</th><th class="r">KMeansAD</th></tr></thead><tbody>
       ${ov.map(o => `<tr data-mk="${o.mk}" class="${o.mk === k ? 'sel' : ''}"><td><b>${o.ml}</b></td><td class="r">${o.n || '—'}</td><td class="r">${o.n ? pts(o.coad) : 'N/A'}</td><td class="r">${o.n ? pts(o.cal) : 'N/A'}</td>
         <td class="r" style="color:${o.d > tol ? 'var(--ok)' : o.d < -tol ? 'var(--bad)' : 'inherit'};font-weight:600">${o.n ? (o.d >= 0 ? '+' : '') + pts(o.d) : '—'}</td>
-        <td class="r">${o.n ? `<span style="color:var(--ok)">▲${o.up}</span> · <span style="color:var(--bad)">▼${o.down}</span> · =${o.n - o.up - o.down}` : '—'}</td><td class="r">${isNaN(o.km) ? '—' : pts(o.km)}</td></tr>`).join('')}
+        <td class="r">${o.n ? `<span style="color:var(--ok)">${o.up} tốt hơn</span> · <span style="color:var(--bad)">${o.down} kém hơn</span> · ${o.n - o.up - o.down} như nhau` : '—'}</td><td class="r">${isNaN(o.km) ? '—' : pts(o.km)}</td></tr>`).join('')}
       </tbody></table><div class="note" style="margin-top:6px">KMeansAD: một lần chạy (không phụ thuộc seed), cả 4 metric lấy từ lần chạy lại Table 1.</div></div></div>`;
     root.innerHTML = `
       <div class="panel"><div class="ph"><h2>Our Improvement so với CoAD gốc</h2>${info(B.aggregation)}</div>
@@ -853,9 +858,9 @@
         <div class="kpi accent" style="--c:${METHOD.coad.color}"><div class="v">${pts(mC)}</div><div class="l">CoAD gốc (trung bình)</div></div>
         <div class="kpi accent" style="--c:${METHOD.calibrated.color}"><div class="v">${pts(mK)}</div><div class="l">Our Improvement (trung bình)</div></div>
         <div class="kpi ${mD > tol ? 'good' : mD < -tol ? 'bad' : ''}"><div class="v">${mD >= 0 ? '+' : ''}${pts(mD)}</div><div class="l">Δ trung bình (điểm)</div></div>
-        <div class="kpi"><div class="v" style="font-size:18px"><span style="color:var(--ok)">▲${up}</span> · <span style="color:var(--bad)">▼${down}</span> · =${tie}</div>
+        <div class="kpi"><div class="v" style="font-size:16px"><span style="color:var(--ok)">${up} tốt hơn</span> · <span style="color:var(--bad)">${down} kém hơn</span> · ${tie} như nhau</div>
           <div class="updown"><span style="width:${100 * up / nn}%;background:#16A34A"></span><span style="width:${100 * tie / nn}%;background:#CBD5E1"></span><span style="width:${100 * down / nn}%;background:#E11D48"></span></div>
-          <div class="l">tăng · giảm · hòa ${info('Hòa khi |Δ| ≤ ' + (tol * 100).toFixed(1) + ' điểm')}</div></div></div>
+          <div class="l">số series so với CoAD gốc ${info('Như nhau khi chênh lệch không quá ' + (tol * 100).toFixed(1) + ' điểm')}</div></div></div>
       <div class="panel"><div class="ph"><h2>Δ ${mlabel[k]} = Our Improvement − CoAD gốc (điểm)</h2></div>
         <div id="cDelta" style="height:${Math.max(260, rows.length * 16 + 60)}px"></div></div>
       <div class="panel"><div class="ph"><h2>Theo family (trung bình các series)</h2></div><div class="pb"><table><thead><tr><th>Family</th><th class="r">Series</th><th class="r">CoAD gốc</th><th class="r">Our Improvement</th><th class="r">Δ</th></tr></thead><tbody>
@@ -923,16 +928,15 @@
     return Object.entries(by).sort();
   }
   function setHTML(list, f) {
-    const paper = f.set === 'paper';
-    const row = r => `<div class="evrow srow ${r.demo && paper ? 'demo' : ''} ${r.demo && paper && r.group === ST.group ? 'cur' : ''}" data-g="${r.group}">
+    const paper = f.set === 'paper', extDemo = new Set((ST.bench.external_demo || []).map(x => x.group));
+    list = list.map(r => (paper ? r : Object.assign({}, r, { demo: extDemo.has(r.group) })));
+    const row = r => `<div class="evrow srow ${r.demo ? 'demo' : ''} ${r.demo && r.group === ST.group ? 'cur' : ''}" data-g="${r.group}">
             <span><b>${r.family} · ${r.group}</b><small>${r.length.toLocaleString('vi')} điểm · ${r.events} sự kiện · ${(100 * r.anomaly_ratio).toFixed(1)}% bất thường${paper ? ' · tập ' + (r.split === 'design' ? 'thiết kế' : 'xác nhận') : ''}</small></span>
-            ${r.demo && paper ? (r.group === ST.group ? '<span class="spill hit">đang xem</span>' : '<span class="spill">mở phân tích →</span>') : ''}</div>`;
-    if (!paper) return `<div class="panel"><div class="ph"><h2>Series</h2><span class="note">${list.length} · chỉ có kết quả tổng hợp, không có checkpoint trong demo</span></div>
-          <div class="evlist" style="max-height:520px;border:0;border-radius:0">${list.map(row).join('')}</div></div>`;
+            ${r.demo ? (r.group === ST.group ? '<span class="spill hit">đang xem</span>' : '<span class="spill">mở phân tích →</span>') : ''}</div>`;
     const demo = list.filter(r => r.demo), rest = list.filter(r => !r.demo);
     return `<div class="panel"><div class="ph"><h2>Có trong demo</h2><span class="note">${demo.length} series · bấm để mở ở Phân tích chuỗi (cũng là danh sách ở thanh bên)</span></div>
           <div class="evlist" style="border:0;border-radius:0">${demo.map(row).join('')}</div></div>
-      <div class="panel"><div class="ph"><h2>Các series khác</h2><span class="note">${rest.length} · chỉ có kết quả tổng hợp (tab Kết quả thực nghiệm)</span></div>
+      <div class="panel"><div class="ph"><h2>Các series khác</h2><span class="note">${rest.length} · ${paper ? 'chỉ có kết quả tổng hợp (tab Kết quả thực nghiệm)' : 'có checkpoint trên Drive (runs/m13), chưa nạp vào demo'}</span></div>
           <div class="evlist" style="max-height:420px;border:0;border-radius:0">${rest.map(row).join('')}</div></div>`;
   }
   function bindSet(list, f) {
