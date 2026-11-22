@@ -534,3 +534,8 @@ aside#sidebar .sbh { font-size: 13px; margin-bottom: 6px; }
 .mchips { display: flex; flex-wrap: wrap; gap: 6px; }
 .mchip { border: 1px solid var(--border); background: #fff; color: var(--muted); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: 12.5px; cursor: pointer; }
 .mchip.on { border-color: var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 10%, #fff); font-weight: 600; }
+
+/* data / results screens: no series picker */
+.workspace.noside { grid-template-columns: 0 1fr !important; }
+.workspace.noside aside { display: none !important; }
+.srow.cur { background: #EFF6FF; box-shadow: inset 3px 0 0 var(--primary); }

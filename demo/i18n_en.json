@@ -731,5 +731,12 @@
 "Dữ liệu: TSB-AD-U · # series của paper và # series nhóm chạy thêm (# family khác)": "Data: TSB-AD-U · # series of the paper and # series we ran in addition (# other families)",
 "Thiết kế / xác nhận: # / # series, ": "Design / confirmation: # / # series, ",
 ". Series chạy thêm: # series mỗi family, ": ". Additional series: # series per family, ",
-". Series chạy thêm: # series mỗi family,": ". Additional series: # series per family,"
+". Series chạy thêm: # series mỗi family,": ". Additional series: # series per family,",
+"Có trong demo": "In the demo",
+"# series · bấm để mở ở Phân tích chuỗi (cũng là danh sách ở thanh bên)": "# series · click to open in Series analysis (the same list as in the sidebar)",
+"Các series khác": "Other series",
+"# · chỉ có kết quả tổng hợp (tab Kết quả thực nghiệm)": "# · aggregate results only (Experiment results tab)",
+"# · chỉ có kết quả tổng hợp, không có checkpoint trong demo": "# · aggregate results only, no checkpoint in the demo",
+"đang xem": "viewing",
+"mở phân tích →": "open analysis →"
 }

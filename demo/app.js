@@ -901,11 +901,17 @@
     return Object.entries(by).sort();
   }
   function setHTML(list, f) {
-    const rows = list, paper = f.set === 'paper';
-    return `<div class="panel"><div class="ph"><h2>Series</h2><span class="note">${rows.length}</span></div>
-          <div class="evlist" style="max-height:520px;border:0;border-radius:0">${rows.map(r => `<div class="evrow srow ${r.demo && paper ? 'demo' : ''}" data-g="${r.group}">
+    const paper = f.set === 'paper';
+    const row = r => `<div class="evrow srow ${r.demo && paper ? 'demo' : ''} ${r.demo && paper && r.group === ST.group ? 'cur' : ''}" data-g="${r.group}">
             <span><b>${r.family} · ${r.group}</b><small>${r.length.toLocaleString('vi')} điểm · ${r.events} sự kiện · ${(100 * r.anomaly_ratio).toFixed(1)}% bất thường${paper ? ' · tập ' + (r.split === 'design' ? 'thiết kế' : 'xác nhận') : ''}</small></span>
-            ${r.demo && paper ? '<span class="spill hit" title="Có checkpoint: bấm để mở Phân tích chuỗi">mở</span>' : ''}</div>`).join('')}</div></div>`;
+            ${r.demo && paper ? (r.group === ST.group ? '<span class="spill hit">đang xem</span>' : '<span class="spill">mở phân tích →</span>') : ''}</div>`;
+    if (!paper) return `<div class="panel"><div class="ph"><h2>Series</h2><span class="note">${list.length} · chỉ có kết quả tổng hợp, không có checkpoint trong demo</span></div>
+          <div class="evlist" style="max-height:520px;border:0;border-radius:0">${list.map(row).join('')}</div></div>`;
+    const demo = list.filter(r => r.demo), rest = list.filter(r => !r.demo);
+    return `<div class="panel"><div class="ph"><h2>Có trong demo</h2><span class="note">${demo.length} series · bấm để mở ở Phân tích chuỗi (cũng là danh sách ở thanh bên)</span></div>
+          <div class="evlist" style="border:0;border-radius:0">${demo.map(row).join('')}</div></div>
+      <div class="panel"><div class="ph"><h2>Các series khác</h2><span class="note">${rest.length} · chỉ có kết quả tổng hợp (tab Kết quả thực nghiệm)</span></div>
+          <div class="evlist" style="max-height:420px;border:0;border-radius:0">${rest.map(row).join('')}</div></div>`;
   }
   function bindSet(list, f) {
     $('#screen-data').querySelectorAll('.srow.demo').forEach(r => r.onclick = () => { selectSeries(+r.dataset.g); go('series'); });
@@ -1359,6 +1365,7 @@
     ST.screen = screen;
     document.querySelectorAll('header nav button').forEach(b => b.classList.toggle('active', b.dataset.screen === screen));
     ['data', 'series', 'errors', 'results'].forEach(s => $('#screen-' + s).classList.toggle('hidden', s !== screen));
+    $('#workspace').classList.toggle('noside', screen === 'data' || screen === 'results');   // the series picker only matters for series / errors
     renderAll();
   }
   function renderAll() {
