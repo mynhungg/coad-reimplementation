@@ -536,6 +536,6 @@ aside#sidebar .sbh { font-size: 13px; margin-bottom: 6px; }
 .mchip.on { border-color: var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 10%, #fff); font-weight: 600; }
 
 /* data / results screens: no series picker */
-.workspace.noside { grid-template-columns: 0 1fr !important; }
+.workspace.noside { grid-template-columns: minmax(0, 1fr) !important; }
 .workspace.noside aside { display: none !important; }
 .srow.cur { background: #EFF6FF; box-shadow: inset 3px 0 0 var(--primary); }
