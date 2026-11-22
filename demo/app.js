@@ -276,14 +276,6 @@
         <span class="bar" style="background:${METHOD[k].color}"></span><span><span class="nm">${METHOD[k].label}</span><span class="sub">${METHOD_DESC[k]}</span></span>
         ${k === 'calibrated' ? info('Phương án M11 B1: chia mỗi nhánh cho độ lệch chuẩn của nó trên phần bình thường trước khi gộp. Không dùng nhãn. Tăng trên tập xác nhận nhưng chưa tổng quát trên 12 family ngoài.') : ''}</label>`).join('');
     $('#cfgMethods').querySelectorAll('input').forEach(i => i.onchange = () => { ST.draft.methods[i.dataset.m] = i.checked; i.closest('.mrow').classList.toggle('off', !i.checked); markPending(); });
-    const seg = $('#cfgPolicy');
-    seg.innerHTML = POLICY_SEG.map(([v, l]) => `<button role="radio" aria-checked="${ST.draft.policy === v}" data-p="${v}" class="${ST.draft.policy === v ? 'on' : ''}">${l}</button>`).join('');
-    const hint = () => { const p = POLICY_SEG.find(x => x[0] === ST.draft.policy); $('#policyHint').textContent = p ? p[2] : ''; };
-    seg.querySelectorAll('button').forEach(b => b.onclick = () => {
-      ST.draft.policy = b.dataset.p; seg.querySelectorAll('button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-checked', x === b); });
-      hint(); renderSliders(); markPending();
-    });
-    hint(); renderSliders();
     const c = m.calibration;
     $('#advanced').innerHTML = `
       <dt>Cửa sổ T</dt><dd class="num">${m.window}</dd><dt>Patch P</dt><dd class="num">${m.patch}</dd>
@@ -294,6 +286,7 @@
   }
   function renderSliders() {
     const box = $('#interactiveBox');
+    if (!box) return;
     box.classList.toggle('hidden', ST.draft.policy !== 'interactive');
     if (ST.draft.policy !== 'interactive' || !ST.data) return;
     const s = $('#sliders'); s.innerHTML = '';
@@ -365,7 +358,7 @@
         <div class="chart" id="cOverview" style="height:64px"></div></div>
       <div class="panel"><div class="ph"><h2>Input · ground truth · prediction</h2></div>
         <div class="chart" id="cInput" style="height:280px"></div></div>
-      <div class="panel"><div class="ph"><h2>Score + ngưỡng</h2>${info('Mỗi phương pháp một trục, ngưỡng theo thang của chính nó; vùng gạch = warm-up (chưa có score hợp lệ).')}</div>
+      <div class="panel"><div class="ph"><h2>Score + ngưỡng</h2>${info('Mỗi phương pháp một trục, ngưỡng theo thang của chính nó; vùng gạch = warm-up (chưa có score hợp lệ).')}<span class="note" style="margin-left:auto">Vạch đứt = ngưỡng báo động: trung bình + 3σ của score trên phần train, không dùng nhãn</span></div>
         <div class="chart" id="cScore" style="height:${Math.max(200, 150 * ms.length)}px"></div></div>
       <div class="panel"><div class="ph"><h2>Input vs reconstruction</h2>${info('Reconstruction của CoAD (lượt tái tạo cuối, code mode), cùng thang với input.')}</div>
         <div class="chart" id="cRecon" style="height:200px"></div></div>

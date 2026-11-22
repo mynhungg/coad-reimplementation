@@ -723,5 +723,6 @@
 "dữ liệu %{y:.#f}<extra></extra>": "data %{y:.#f}<extra></extra>",
 "t=%{x}<br>CoAD gốc score=%{y:.#f}<extra></extra>": "t=%{x}<br>Original CoAD score=%{y:.#f}<extra></extra>",
 "vẽ lại %{y:.#f}<extra></extra>": "rebuilt %{y:.#f}<extra></extra>",
-"Dữ liệu: TSB-AD-U, # series của paper": "Data: TSB-AD-U, # series of the paper"
+"Dữ liệu: TSB-AD-U, # series của paper": "Data: TSB-AD-U, # series of the paper",
+"Vạch đứt = ngưỡng báo động: trung bình + #σ của score trên phần train, không dùng nhãn": "Dashed line = alarm threshold: mean + #σ of the score on the training part, no labels used"
 }
