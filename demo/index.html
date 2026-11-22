@@ -6,7 +6,7 @@
 <title>CoAD Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=50">
+<link rel="stylesheet" href="style.css?v=56">
 <script src="vendor/plotly-2.35.2.min.js"></script>
 </head>
 <body>
@@ -42,22 +42,7 @@
     </section>
 
 
-    <div class="applybar" id="applyBar">
-      <div id="pendingNote" class="pending hidden">● Có thay đổi chưa áp dụng</div>
-      <div class="row"><button class="btn" id="applyBtn">Áp dụng</button><button class="btn ghost" id="resetBtn">Đặt lại</button></div>
-    </div>
 
-    <section class="sb">
-      <div class="sbh"><span class="num">3</span>Dữ liệu của bạn <span class="opt">tùy chọn</span></div>
-      <label class="drop" id="dropZone"><input type="file" id="csvFile" accept=".csv,text/csv" hidden>
-        <span class="ic"></span><b>Kéo thả file CSV</b><span>hoặc bấm để chọn</span><small>cột thời gian · giá trị · nhãn (nếu có)</small></label>
-      <div class="samples"><span class="note">Dùng thử:</span>
-        <button class="chip" data-sample="NAB_nyc_taxi.csv" title="NAB: số lượt taxi New York, có nhãn">NYC taxi</button>
-        <button class="chip" data-sample="NAB_machine_temperature_system_failure.csv" title="NAB: nhiệt độ máy công nghiệp, có nhãn">Nhiệt độ máy</button>
-        <button class="chip" data-sample="sample_SED_234_valid.csv" title="Trích 6 000 điểm của TSB-AD SED 234">SED 234</button>
-        <button class="chip" data-sample="sample_with_errors.csv" title="File cố ý có lỗi định dạng">File lỗi</button></div>
-      <div id="uploadBox"></div>
-    </section>
   </aside>
 
   <main>
@@ -70,9 +55,9 @@
 
 <div class="modal" id="about"><div class="box" id="aboutBox"></div></div>
 
-<script src="i18n.js?v=9"></script>
+<script src="i18n.js?v=11"></script>
 <script src="rules.js?v=38"></script>
 <script src="illus.js?v=50"></script>
-<script src="app.js?v=54"></script>
+<script src="app.js?v=56"></script>
 </body>
 </html>

@@ -236,7 +236,7 @@
   function renderToolbar() {
     const tb = $('#toolbar');
     if (ST.screen === 'results') { tb.innerHTML = `<span class="meta">Kết quả benchmark tính sẵn — <b>${ST.bench ? ST.bench.rows.length : 0}</b> series</span>`; return; }
-    if (ST.screen === 'data') { tb.innerHTML = '<span class="meta">Dữ liệu: TSB-AD-U, 64 series của paper</span>'; return; }
+    if (ST.screen === 'data') { tb.innerHTML = '<span class="meta">Dữ liệu: TSB-AD-U · 64 series của paper và 60 series nhóm chạy thêm (12 family khác)</span>'; return; }
     if (!ST.data) { tb.innerHTML = '<span class="meta">Chưa chọn dữ liệu</span>'; return; }
     const m = ST.data.meta, ms = activeMethods().map(k => `<span class="swatch" style="background:${METHOD[k].color}"></span> ${METHOD[k].label}`).join(' &nbsp; ');
     const pol = ST.cfg.policy === 'interactive' ? '<span class="badge inter">Interactive</span>' : esc(POLICY_LABEL[ST.cfg.policy]);
@@ -264,18 +264,15 @@
     const box = $('#cfgSeries'), demo = ST.bench.rows.filter(r => r.demo);
     box.innerHTML = demo.map(r => {
       const [icon, name] = IL.family(r.family), tag = DEMO_TAG[r.group], missing = ST.cache[r.group] === null;
-      return `<button class="scard ${r.group === ST.group ? 'sel' : ''}" data-g="${r.group}" ${missing ? 'disabled title="Chưa có dữ liệu tính sẵn"' : ''}>
-        <span class="fi">${icon}</span><span><span class="nm">${r.family} · ${r.group}</span><span class="sub">${name}</span></span>
-        ${tag ? `<span class="tg ${tag}">${{ success: 'Impr. tốt hơn', failure: 'Impr. kém (seed demo)', representative: 'Đại diện' }[tag]}</span>` : ''}</button>`;
-    }).join('') + (ST.userSeries || []).map(u => `<button class="scard ${u.group === ST.group ? 'sel' : ''}" data-g="${u.group}"><span class="fi"></span><span><span class="nm">${esc(u.name)}</span><span class="sub">CoAD train trên file của bạn · ${u.epochs} epoch</span></span></button>`).join('') + (ST.data ? `<div class="sinfo">${ST.data.meta.length.toLocaleString('vi')} điểm đo · học trên ${ST.data.meta.n_train.toLocaleString('vi')} điểm đầu · chu kỳ ${ST.data.meta.period} điểm</div>` : '');
-    box.querySelectorAll('.scard').forEach(b => b.onclick = () => { if (+b.dataset.g !== ST.group) { b.querySelector('.sub').textContent = 'Đang tải…'; selectSeries(+b.dataset.g); } });
+      const tagText = tag ? { success: 'Impr. tốt hơn', failure: 'Impr. kém (seed demo)', representative: 'Đại diện' }[tag] : '';
+      return `<button class="srow1 ${r.group === ST.group ? 'sel' : ''}" data-g="${r.group}" ${missing ? 'disabled title="Chưa có dữ liệu tính sẵn"' : ''}>
+        <span class="nm">${r.family} ${r.group}</span><span class="sub">${name}</span>${tag ? `<i class="tdot ${tag}" title="${tagText}"></i>` : ''}</button>`;
+    }).join('') + `<div class="tlegend"><span><i class="tdot success"></i>Impr. tốt hơn</span><span><i class="tdot failure"></i>Impr. kém</span><span><i class="tdot representative"></i>Đại diện</span></div>`;
+    box.querySelectorAll('.srow1').forEach(b => b.onclick = () => { if (+b.dataset.g !== ST.group) { b.classList.add('loading'); selectSeries(+b.dataset.g); } });
     if (!ST.data) { $('#cfgMethods').innerHTML = ''; return; }
     const m = ST.data.meta;
-    $('#cfgMethods').innerHTML = methodsAvailable(ST.data).map(k => `
-      <label class="mrow ${ST.draft.methods[k] ? '' : 'off'}"><input type="checkbox" data-m="${k}" ${ST.draft.methods[k] ? 'checked' : ''}>
-        <span class="bar" style="background:${METHOD[k].color}"></span><span><span class="nm">${METHOD[k].label}</span><span class="sub">${METHOD_DESC[k]}</span></span>
-        ${k === 'calibrated' ? info('Phương án M11 B1: chia mỗi nhánh cho độ lệch chuẩn của nó trên phần bình thường trước khi gộp. Không dùng nhãn. Tăng trên tập xác nhận nhưng chưa tổng quát trên 12 family ngoài.') : ''}</label>`).join('');
-    $('#cfgMethods').querySelectorAll('input').forEach(i => i.onchange = () => { ST.draft.methods[i.dataset.m] = i.checked; i.closest('.mrow').classList.toggle('off', !i.checked); markPending(); });
+    $('#cfgMethods').innerHTML = '<div class="mchips">' + methodsAvailable(ST.data).map(k => `<button class="mchip ${ST.draft.methods[k] ? 'on' : ''}" data-m="${k}" style="--c:${METHOD[k].color}" title="${METHOD_DESC[k]}">${METHOD[k].label}</button>`).join('') + '</div>';
+    $('#cfgMethods').querySelectorAll('.mchip').forEach(b => b.onclick = () => { ST.draft.methods[b.dataset.m] = !ST.draft.methods[b.dataset.m]; apply(); renderSidebar(); });
     const c = m.calibration;
     $('#advanced').innerHTML = `
       <dt>Cửa sổ T</dt><dd class="num">${m.window}</dd><dt>Patch P</dt><dd class="num">${m.patch}</dd>
@@ -301,7 +298,7 @@
       row.append(inp); s.append(row);
     });
   }
-  function markPending() { const dirty = JSON.stringify(ST.draft) !== JSON.stringify(ST.cfg); $('#pendingNote').classList.toggle('hidden', !dirty); $('#applyBar').classList.toggle('dirty', dirty); }
+  function markPending() { if (!$('#applyBar')) return; const dirty = JSON.stringify(ST.draft) !== JSON.stringify(ST.cfg); $('#pendingNote').classList.toggle('hidden', !dirty); $('#applyBar').classList.toggle('dirty', dirty); }
   function apply() { ST.cfg = JSON.parse(JSON.stringify(ST.draft)); markPending(); if (ST.data) { compute(); renderAll(); } }
 
   /* ---------- screen: series ---------- */
@@ -347,7 +344,6 @@
     if (!ST.data) { root.innerHTML = ST.loadError ? `<div class="panel"><div class="empty">${esc(ST.loadError)}</div></div>` : '<div class="panel"><div class="empty">Chọn một series mẫu ở thanh bên trái để xem kết quả.</div></div>'; return; }
     const ms = activeMethods();
     root.innerHTML = `
-      ${ST.upload && !(ST.data.meta.family === 'CSV' && ST.data.meta.file === ST.upload.name) ? uploadPanelHTML() : ''}
       ${ST.data.meta.family === 'CSV' ? journeyHTML(4, ST.story === 4 ? 4 : 3) + (ST.story === 4 ? storyResultsHTML() : '') : ''}${ST.data.meta.family === 'CSV' ? '' : contextCard()}
       <div class="mcards">${ms.map(methodCard).join('') || '<span class="note">Chọn ít nhất một phương pháp.</span>'}</div>
       <div class="split"><div>
@@ -873,7 +869,7 @@
       catch (e) { root.innerHTML = `<div class="panel"><div class="empty">Không đọc được data/datasets.json (${esc(e.message)}). Chạy tools/build_datasets.js.</div></div>`; return; }
     }
     const D = ST.datasets, f = ST.dataFilter || (ST.dataFilter = { set: 'paper', family: 'all' });
-    if ((f.set === 'upload' && !ST.upload) || f.set === 'external' || f.set === 'kdd21') f.set = 'paper';
+    if (f.set !== 'paper' && f.set !== 'external') f.set = 'paper';
     const sumEv = l => l.reduce((s, r) => s + r.events, 0).toLocaleString('vi'), nFam = l => new Set(l.map(r => r.family)).size;
     const card = (key, color, icon, title, big, sub, role) => `<button class="dcard ${f.set === key ? 'sel' : ''}" data-set="${key}" style="--c:${color}">
         <span class="dic">${icon}</span><span class="dt">${title}</span><span class="dv">${big}</span><span class="ds">${sub}</span><span class="dr">${role}</span></button>`;
@@ -885,19 +881,19 @@
     root.innerHTML = `
       <div class="dcards">
         ${card('paper', '#2563EB', '', 'TSB-AD · 64 series của paper', D.paper.length, `${nFam(D.paper)} family · ${sumEv(D.paper)} sự kiện`, 'Tái lập Table 1 · thử cải tiến')}
-        ${card('upload', '#7C3AED', '', 'Dữ liệu của bạn', ST.upload ? ST.upload.rows.length.toLocaleString('vi') : '+', ST.upload ? esc(ST.upload.name) : 'kéo thả CSV vào thanh bên', ST.upload ? 'Phân tích mô tả' : 'Bấm để chọn file')}
+        ${card('external', '#B45309', '', 'Series nhóm chạy thêm (ngoài paper)', D.external.length, `${nFam(D.external)} family khác · ${sumEv(D.external)} sự kiện`, 'Kiểm tra cải tiến có tổng quát không')}
       </div>
       ${body}
       <details class="more" style="margin:4px 2px 16px"><summary>Cách tiền xử lý và chia tập</summary><ul class="note" style="margin:6px 0 0 18px;padding:0">
         <li>Mọi series đơn biến, có nhãn từng điểm. Phần học là đoạn đầu chuỗi (độ dài ghi trong tên file); loader của tác giả chấm điểm toàn chuỗi.</li>
         <li>Min–max theo phần học. Không tự nội suy hay lấy mẫu lại.</li>
-        <li>Thiết kế / xác nhận: 30 / 34 series, <code>default_rng(2026)</code>.</li></ul></details>`;
+        <li>Thiết kế / xác nhận: 30 / 34 series, <code>default_rng(2026)</code>. Series chạy thêm: 5 series mỗi family, <code>default_rng(2027)</code>, bỏ file trùng.</li></ul></details>`;
     root.querySelectorAll('.dcard').forEach(b => b.onclick = () => {
       if (b.dataset.set === 'upload' && !ST.upload) { $('#csvFile').click(); return; }
       f.set = b.dataset.set; f.family = 'all'; renderData();
     });
     if (f.set === 'upload') bindUploadAnalysis();
-    if (f.set === 'paper' || f.set === 'external') bindSet(f.set === 'paper' ? D.paper : D.external, f);
+    bindSet(f.set === 'paper' ? D.paper : D.external, f);
   }
   function famStats(list) {
     const by = {};
@@ -938,8 +934,8 @@
     renderUploadSide(); go(ST.screen === 'data' ? 'data' : 'series');
   }
   const readFile = file => { if (!file) return; const r = new FileReader(); r.onload = () => loadCsv(file.name, String(r.result)); r.readAsText(file); };
-  $('#csvFile').onchange = e => readFile(e.target.files[0]);
-  const dz = $('#dropZone');
+  if ($('#csvFile')) $('#csvFile').onchange = e => readFile(e.target.files[0]);
+  const dz = $('#dropZone') || document.createElement('div');
   ['dragenter', 'dragover'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add('over'); }));
   ['dragleave', 'drop'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove('over'); }));
   dz.addEventListener('drop', e => readFile(e.dataTransfer.files[0]));
@@ -1389,7 +1385,7 @@
 
   document.querySelectorAll('header nav button').forEach(b => b.onclick = () => go(b.dataset.screen));
   $('#toggleSidebar').onclick = () => { const w = $('#workspace'); w.classList.toggle(innerWidth <= 860 ? 'open' : 'collapsed'); };
-  $('#workspace').addEventListener('click', e => { const w = $('#workspace'); if (w.classList.contains('open') && (e.target === w || e.target.closest('#applyBtn'))) w.classList.remove('open'); });
+  $('#workspace').addEventListener('click', e => { const w = $('#workspace'); if (w.classList.contains('open') && (e.target === w || e.target.closest('.srow1'))) w.classList.remove('open'); });
   $('#openAbout').onclick = () => { renderAbout(); $('#about').classList.add('open'); };
   $('#about').onclick = e => { if (e.target.id === 'about') $('#about').classList.remove('open'); };
 
@@ -1440,8 +1436,7 @@
   function tourEnd() { if (hole) hole.remove(); if (pop) pop.remove(); hole = pop = null; tourI = -1; store.set('coad-tour-seen', true); }
   $('#openTour').onclick = () => { if (tourI < 0) tourStart(); };
   document.addEventListener('keydown', e => { if (tourI >= 0 && e.key === 'Escape') tourEnd(); });
-  $('#applyBtn').onclick = apply;
-  $('#resetBtn').onclick = () => { ST.draft = { methods: { coad: true, calibrated: true, kmeans: false }, policy: 'train_mu3sd', inter: {} }; renderSidebar(); markPending(); };
+
 
   (async function init() {
     try { ST.bench = await loadJSON('data/benchmark.json'); }
@@ -1456,7 +1451,6 @@
     if (first !== null) {
       await selectSeries(first);
       if (!store.get('coad-tour-seen', false)) setTimeout(tourStart, 800);   // first visit: guided tour
-      loadUserSeries();
       return;
     }
     renderSidebar(); renderAll();

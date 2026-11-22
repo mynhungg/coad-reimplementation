@@ -31,7 +31,7 @@
 "(không có)": "(none)",
 "(mặc định)": "(default)",
 "(ngưỡng) thì báo động. Mỗi phương pháp có thang điểm riêng nên vẽ trên trục riêng.": "(threshold) raises an alarm. Each method has its own scale, so it gets its own axis.",
-", bỏ file trùng.": ", duplicates removed.",
+", bỏ file trùng.": ", duplicate files removed.",
 ", không ghi đè kết quả chính thức.": ", never overwrites the official results.",
 ", không phải đột biến, nên ngưỡng giá trị đơn giản sẽ bỏ sót; cần mô hình xét ngữ cảnh như CoAD.": ", not spikes, so a simple value threshold misses them; a context-aware model such as CoAD is needed.",
 ", trung bình # seed. Trên # series của # family khác, Our Improvement": ", mean of # seeds. On # series of # other families, Our Improvement",
@@ -724,5 +724,12 @@
 "t=%{x}<br>CoAD gốc score=%{y:.#f}<extra></extra>": "t=%{x}<br>Original CoAD score=%{y:.#f}<extra></extra>",
 "vẽ lại %{y:.#f}<extra></extra>": "rebuilt %{y:.#f}<extra></extra>",
 "Dữ liệu: TSB-AD-U, # series của paper": "Data: TSB-AD-U, # series of the paper",
-"Vạch đứt = ngưỡng báo động: trung bình + #σ của score trên phần train, không dùng nhãn": "Dashed line = alarm threshold: mean + #σ of the score on the training part, no labels used"
+"Vạch đứt = ngưỡng báo động: trung bình + #σ của score trên phần train, không dùng nhãn": "Dashed line = alarm threshold: mean + #σ of the score on the training part, no labels used",
+"Impr. kém": "Impr. worse",
+"Series nhóm chạy thêm (ngoài paper)": "Series we ran in addition (outside the paper)",
+"Kiểm tra cải tiến có tổng quát không": "Checks whether the improvement generalises",
+"Dữ liệu: TSB-AD-U · # series của paper và # series nhóm chạy thêm (# family khác)": "Data: TSB-AD-U · # series of the paper and # series we ran in addition (# other families)",
+"Thiết kế / xác nhận: # / # series, ": "Design / confirmation: # / # series, ",
+". Series chạy thêm: # series mỗi family, ": ". Additional series: # series per family, ",
+". Series chạy thêm: # series mỗi family,": ". Additional series: # series per family,"
 }
