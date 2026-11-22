@@ -541,3 +541,23 @@ aside#sidebar .sbh { font-size: 13px; margin-bottom: 6px; }
 .srow.cur { background: #EFF6FF; box-shadow: inset 3px 0 0 var(--primary); }
 
 .ovt tr[data-mk] { cursor: pointer; } .ovt tr[data-mk]:hover { background: var(--chip); } .ovt tr.sel { background: #EFF6FF; }
+
+/* ===== quiet results header ===== */
+.ctx2 { display: flex; flex-wrap: wrap; gap: 4px 0; align-items: baseline; margin: 0 0 10px; padding: 0 2px; background: none; border: 0; box-shadow: none; font-size: 13px; color: var(--muted); }
+.ctx2 b { color: var(--text); font-size: 15px; margin-right: 10px; }
+.ctx2 span + span::before { content: '·'; margin: 0 8px; color: #CBD5E1; }
+.mcards.panel { padding: 0; margin-bottom: 12px; display: block; }
+.mtab { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mtab th { font-weight: 500; color: var(--muted); font-size: 12px; text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); background: none; }
+.mtab td { padding: 9px 12px; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
+.mtab tr:last-child td { border-bottom: 0; }
+.mtab .r { text-align: right; }
+.mtab .num { font-variant-numeric: tabular-nums; font-size: 15px; }
+.mtab .num b { font-weight: 600; }
+.mtab .of { color: var(--muted); font-size: 13px; }
+.mtab .mname { font-weight: 600; white-space: nowrap; }
+.mtab .mname i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 8px; vertical-align: 1px; }
+.mtab .dots { margin: 0; }
+.mtab .lgd { font-weight: 400; margin-left: 10px; }
+.mtab .lgd i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin: 0 3px 0 8px; vertical-align: 0; }
+.mtab .lgd i.hit { background: #16A34A; } .mtab .lgd i.partial { background: #F59E0B; } .mtab .lgd i.missed { background: #E11D48; }

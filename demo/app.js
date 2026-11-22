@@ -70,7 +70,7 @@
   ST.draft = JSON.parse(JSON.stringify(ST.cfg));
 
   /* ---------- data ---------- */
-  async function loadJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(url + ': ' + r.status); return r.json(); }
+  async function loadJSON(url) { const r = await fetch(url, { cache: 'no-cache' }); if (!r.ok) throw new Error(url + ': ' + r.status); return r.json(); }
 
   async function loadSeries(group) {
     if (ST.cache[group]) return ST.cache[group];
@@ -311,25 +311,29 @@
 
   const STATUS_VI = { hit: 'phát hiện', partial: 'một phần', missed: 'bỏ sót' };
   /* one card per method: the numbers a reader needs first, rules and units in the (i) tooltips */
+  // one row of the results table: plain numbers in aligned columns, the event strip, the threshold as a footnote
   function methodCard(m) {
     const ev = ST.results[m].ev, met = ST.data.meta.methods[m].metrics, th = ST.results[m].th;
     const dots = ev.events.map((e, k) => `<i class="${e.status} ${ST.selEvent && ST.selEvent.id === e.id ? 'sel' : ''}" data-k="${k}" title="${e.id}: ${e.a}–${e.b - 1} · ${STATUS_VI[e.status]} · coverage ${pct(e.coverage)}"></i>`).join('');
-    return `<div class="mcard" style="--c:${METHOD[m].color}"><div class="hd"><span class="swatch" style="background:${METHOD[m].color}"></span>${METHOD[m].label}
-        <span class="th">ngưỡng <span class="num">${fmt(th.value, 4)}</span> ${info(POLICY_LABEL[th.policy])}</span></div>
-      <div class="row" title="${esc(R.RULES.hit + ' ' + R.RULES.false_alarm + ' VUS-PR không phụ thuộc ngưỡng (evaluator TSB-AD); AUC-PR ' + pts(met.auc_prc) + '.')}"><div><span class="big">${ev.nHit}<small> / ${ev.events.length}</small></span><span class="lab">bắt được</span></div>
-        <div><span class="big">${ev.falseAlarms.length}</span><span class="lab">báo sai</span></div>
-        <div><span class="big">${pts(met.VUS_PR)}</span><span class="lab">VUS-PR</span></div></div>
-      ${ev.events.length ? `<div class="dots" data-m="${m}">${dots}</div>` : ''}
-      <div class="lab" style="margin-top:4px">Gắn cờ ${ev.flagged.toLocaleString('vi')} điểm (${pct(ev.flaggedShare)}) · ${ev.intervals.length} đoạn · P ${pct(ev.point.precision)} · R ${pct(ev.point.recall)} ${info(R.RULES.predicted_interval + ' ' + R.RULES.point)}</div></div>`;
+    const tip = `Ngưỡng ${fmt(th.value, 4)} (${POLICY_LABEL[th.policy]}). Gắn cờ ${ev.flagged.toLocaleString('vi')} điểm (${pct(ev.flaggedShare)}) · ${ev.intervals.length} đoạn · P ${pct(ev.point.precision)} · R ${pct(ev.point.recall)} · AUC-PR ${pts(met.auc_prc)}`;
+    return `<tr><td class="mname"><i style="background:${METHOD[m].color}"></i>${METHOD[m].label}</td>
+      <td class="r num"><b>${ev.nHit}</b><span class="of">/${ev.events.length}</span></td><td class="r num">${ev.falseAlarms.length}</td>
+      <td class="r num"><b>${pts(met.VUS_PR)}</b></td>
+      <td>${ev.events.length ? `<div class="dots" data-m="${m}">${dots}</div>` : ''}</td>
+      <td class="r">${info(tip)}</td></tr>`;
   }
-  /* "what am I looking at": the series in plain words + the question the screen answers */
+  function methodTable(ms) {
+    if (!ms.length) return '<span class="note">Chọn ít nhất một phương pháp.</span>';
+    return `<div class="mcards panel"><table class="mtab"><thead><tr><th>Phương pháp</th><th class="r">Bắt được</th><th class="r">Báo nhầm</th><th class="r">VUS-PR</th>
+      <th>Từng đoạn bất thường <span class="lgd"><i class="hit"></i>bắt <i class="partial"></i>một phần <i class="missed"></i>sót</span></th><th></th></tr></thead>
+      <tbody>${ms.map(methodCard).join('')}</tbody></table></div>`;
+  }
+  /* one quiet line: which series, how long, how many anomalies */
   function contextCard() {
-    const m = ST.data.meta, [icon, name, desc] = IL.family(m.family), ms = activeMethods();
+    const m = ST.data.meta, [, name] = IL.family(m.family), ms = activeMethods();
     const nEv = ms.length ? ST.results[ms[0]].ev.events.length : 0;
-    const anyMiss = ms.some(k => ST.results[k].ev.nMissed > 0);
-    return `<div class="context explain" style="margin:0 0 12px"><span class="ico">${icon}</span><div style="flex:1">
-      <h3>${name} · chuỗi ${m.group}</h3><p class="q">Mô hình có bắt được ${nEv} đoạn bất thường (nền cam) mà ít báo nhầm không?</p>
-      <p>${desc}. ${m.length.toLocaleString('vi')} điểm đo; ${m.n_train.toLocaleString('vi')} điểm đầu là phần bình thường để mô hình học.</p></div></div>`;
+    return `<div class="context ctx2"><b>${m.family} ${m.group}</b><span>${name}</span><span>${m.length.toLocaleString('vi')} điểm</span>
+      <span>học trên ${m.n_train.toLocaleString('vi')} điểm đầu</span><span>${nEv} đoạn bất thường</span></div>`;
   }
   function selectEvent(e, kind = 'gt', method) {
     const ctx = Math.max(ST.data.meta.period * 2, e.b - e.a);
@@ -345,7 +349,7 @@
     const ms = activeMethods();
     root.innerHTML = `
       ${ST.data.meta.family === 'CSV' ? journeyHTML(4, ST.story === 4 ? 4 : 3) + (ST.story === 4 ? storyResultsHTML() : '') : ''}${ST.data.meta.family === 'CSV' ? '' : contextCard()}
-      <div class="mcards">${ms.map(methodCard).join('') || '<span class="note">Chọn ít nhất một phương pháp.</span>'}</div>
+      ${methodTable(ms)}
       <div class="split"><div>
       <div class="panel"><div class="ph viewbar" id="viewing" style="margin:0"><h2>Tổng quan</h2>
         <span>Đang xem <b class="range num"></b></span><button class="btn small" id="fullBtn">Toàn chuỗi</button>
@@ -652,6 +656,8 @@
     { id: 'C', n: '⑤', t: 'Kết luận cho từng patch: A_c = (A + Aʳ)/2', s: 'Mức nghi ngờ cuối của patch; đi tiếp vào score theo thời điểm (tab Dấu vết).', key: 'patch_p_comb', color: '#7C3AED' },
   ];
   function renderInspector(box) {
+    // only one inspector may exist at a time: its charts are looked up by id
+    document.querySelectorAll('#inspBox, #caseTab').forEach(b => { if (b !== box && b.querySelector('.flow2, #patchBox')) b.innerHTML = ''; });
     const d = ST.data;
     if (!d.arr.patch_p_time) { box.innerHTML = '<div class="warnbox">Thiếu diagnostics cấp patch cho series này; score cuối vẫn khả dụng.</div>'; return; }
     if (ST.inspT === null) {
@@ -824,14 +830,14 @@
       const d = rr.map(r => r[mk + '_cal'] - r[mk + '_coad']);
       return { mk, ml, n: rr.length, coad: mean(rr.map(r => r[mk + '_coad'])), cal: mean(rr.map(r => r[mk + '_cal'])), d: mean(d),
                up: d.filter(x => x > tol).length, down: d.filter(x => x < -tol).length,
-               km: mk === 'VUS_PR' ? mean(rr.filter(r => r.VUS_PR_kmeans !== null && r.VUS_PR_kmeans !== undefined).map(r => r.VUS_PR_kmeans)) : NaN };
+               km: mean(rr.filter(r => r[mk + '_kmeans'] !== null && r[mk + '_kmeans'] !== undefined).map(r => r[mk + '_kmeans'])) };
     });
     const ovHTML = `<div class="panel"><div class="ph"><h2>Tổng quan · cả 4 metric</h2><span class="note">${f.split === 'confirmation' ? 'tập xác nhận' : f.split === 'design' ? 'tập thiết kế' : 'mọi tập'}${f.family !== 'all' ? ' · ' + f.family : ''} · trung bình các series · bấm một dòng để xem chi tiết metric đó</span></div>
       <div class="pb"><table class="ovt"><thead><tr><th>Metric</th><th class="r">Series</th><th class="r">CoAD gốc</th><th class="r">Our Improvement</th><th class="r">Δ</th><th class="r">Tăng · giảm · hòa</th><th class="r">KMeansAD</th></tr></thead><tbody>
       ${ov.map(o => `<tr data-mk="${o.mk}" class="${o.mk === k ? 'sel' : ''}"><td><b>${o.ml}</b></td><td class="r">${o.n || '—'}</td><td class="r">${o.n ? pts(o.coad) : 'N/A'}</td><td class="r">${o.n ? pts(o.cal) : 'N/A'}</td>
         <td class="r" style="color:${o.d > tol ? 'var(--ok)' : o.d < -tol ? 'var(--bad)' : 'inherit'};font-weight:600">${o.n ? (o.d >= 0 ? '+' : '') + pts(o.d) : '—'}</td>
         <td class="r">${o.n ? `<span style="color:var(--ok)">▲${o.up}</span> · <span style="color:var(--bad)">▼${o.down}</span> · =${o.n - o.up - o.down}` : '—'}</td><td class="r">${isNaN(o.km) ? '—' : pts(o.km)}</td></tr>`).join('')}
-      </tbody></table><div class="note" style="margin-top:6px">KMeansAD chỉ có VUS-PR (một lần chạy, không phụ thuộc seed).</div></div></div>`;
+      </tbody></table><div class="note" style="margin-top:6px">KMeansAD: một lần chạy (không phụ thuộc seed), cả 4 metric lấy từ lần chạy lại Table 1.</div></div></div>`;
     root.innerHTML = `
       <div class="panel"><div class="ph"><h2>Our Improvement so với CoAD gốc</h2>${info(B.aggregation)}</div>
         <div class="pb"><div class="filters">

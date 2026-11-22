@@ -281,7 +281,7 @@
 "Phân tích chuỗi": "Series analysis",
 "Phân tích lỗi": "Error analysis",
 "Phân tích mô tả": "Descriptive analysis",
-"Phương pháp": "Methods",
+"Phương pháp": "Method",
 "Phương án M# B#: chia mỗi nhánh cho độ lệch chuẩn của nó trên phần bình thường trước khi gộp. Không dùng nhãn. Tăng trên tập xác nhận nhưng chưa tổng quát trên # family ngoài.": "Variant M# B#: divides each branch by its standard deviation on the normal part before fusion. No labels used. Gains on the confirmation set but does not generalise to # external families.",
 "Phạm vi & tái lập": "Scope & reproducibility",
 "Phạm vi và tái lập": "Scope and reproducibility",
@@ -748,5 +748,13 @@
 "KMeansAD chỉ có VUS-PR (một lần chạy, không phụ thuộc seed).": "KMeansAD has VUS-PR only (one run, no seed dependence).",
 "tập xác nhận · trung bình các series · bấm một dòng để xem chi tiết metric đó": "confirmation set · mean over series · click a row to see that metric in detail",
 "tập thiết kế · trung bình các series · bấm một dòng để xem chi tiết metric đó": "design set · mean over series · click a row to see that metric in detail",
-"mọi tập · trung bình các series · bấm một dòng để xem chi tiết metric đó": "all sets · mean over series · click a row to see that metric in detail"
+"mọi tập · trung bình các series · bấm một dòng để xem chi tiết metric đó": "all sets · mean over series · click a row to see that metric in detail",
+"KMeansAD: một lần chạy (không phụ thuộc seed), cả # metric lấy từ lần chạy lại Table #.": "KMeansAD: one run (no seed dependence); all # metrics from our Table # rerun.",
+"Từng đoạn bất thường": "Each anomaly",
+"bắt": "hit",
+"sót": "missed",
+"học trên # điểm đầu": "learns on the first #",
+"# đoạn bất thường": "# anomalies",
+"Ngưỡng # (Train μ + #σ (normal calibration)). Gắn cờ # điểm (#%) · # đoạn · P #% · R #% · AUC-PR #": "Threshold # (Train μ + #σ (normal calibration)). Flagged # points (#%) · # intervals · P #% · R #% · AUC-PR #",
+"t=%{x}<br>trước làm mượt=%{y:.#f}<extra></extra>": "t=%{x}<br>before smoothing=%{y:.#f}<extra></extra>"
 }
