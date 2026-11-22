@@ -120,7 +120,7 @@
     return svg(240, 92, `<line x1="120" x2="120" y1="2" y2="74" stroke="#0F172A"/>
       ${v.map((d, i) => `<rect x="${d < 0 ? 120 + d * 3 : 120}" y="${y0 + i * 11}" width="${Math.abs(d) * 3}" height="8" rx="2" fill="${d < 0 ? C.bad : C.ok}" class="motion">
         <animate attributeName="width" values="0;${Math.abs(d) * 3}" dur="1.2s" fill="freeze"/>${d < 0 ? `<animate attributeName="x" values="120;${120 + d * 3}" dur="1.2s" fill="freeze"/>` : ''}</rect>`).join('')}
-      ${T(60, 88, '← Calibrated kém hơn', { fill: C.bad, size: 9 })}${T(180, 88, 'Calibrated tốt hơn →', { fill: C.ok, size: 9 })}`, 'Biểu đồ chênh lệch');
+      ${T(60, 88, '← Our Improvement kém hơn', { fill: C.bad, size: 9 })}${T(180, 88, 'Our Improvement tốt hơn →', { fill: C.ok, size: 9 })}`, 'Biểu đồ chênh lệch');
   }
 
   const FAMILY = {

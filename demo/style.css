@@ -509,3 +509,8 @@ header nav button, header .link, header .brand { white-space: nowrap; flex: none
   .workspace.open::before { content: ''; position: fixed; inset: 56px 0 0 0; background: rgba(15,23,42,.25); z-index: 35; }
   #openAbout { display: none; }
 }
+
+/* ===== trimmed layout: no side dock on the series screen, single-panel comparison on error analysis ===== */
+#screen-series .split { grid-template-columns: minmax(0, 1fr) !important; }
+.ecmp.one { grid-template-columns: minmax(0, 1fr) !important; }
+#inspPanel .flow2 { max-width: 1100px; }

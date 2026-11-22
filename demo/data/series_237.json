@@ -1297,7 +1297,7 @@
    }
   },
   "calibrated": {
-   "label": "Calibrated",
+   "label": "Our Improvement",
    "score": "cal_final",
    "pre": "cal_pre",
    "thresholds": {

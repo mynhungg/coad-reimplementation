@@ -24,7 +24,7 @@
 
   const METHOD = {
     coad: { label: 'CoAD gốc', color: '#2563EB' },
-    calibrated: { label: 'Calibrated', color: '#7C3AED' },
+    calibrated: { label: 'Our Improvement', color: '#7C3AED' },
     kmeans: { label: 'KMeansAD', color: '#B45309' },
   };
   const POLICY_LABEL = {
@@ -49,8 +49,8 @@
     calibrated: [
       ['cal_c', 'Nhánh phân loại / σ_c (train)', 'đơn vị σ của phần train'],
       ['cal_r', 'Nhánh tái tạo / σ_r (train)', 'đơn vị σ của phần train'],
-      ['cal_pre', 'Gộp calibrated trước làm mượt', 'đơn vị σ'],
-      ['cal_final', 'Score cuối Calibrated', 'đơn vị σ'],
+      ['cal_pre', 'Gộp Our Improvement trước làm mượt', 'đơn vị σ'],
+      ['cal_final', 'Score cuối Our Improvement', 'đơn vị σ'],
     ],
   };
   const STAGE_LABEL = Object.fromEntries([...STAGES.shared, ...STAGES.coad, ...STAGES.calibrated].map(s => [s[0], s[1]]));
@@ -233,7 +233,7 @@
   function renderToolbar() {
     const tb = $('#toolbar');
     if (ST.screen === 'results') { tb.innerHTML = `<span class="meta">Kết quả benchmark tính sẵn — <b>${ST.bench ? ST.bench.rows.length : 0}</b> series</span>`; return; }
-    if (ST.screen === 'data') { tb.innerHTML = '<span class="meta">Dữ liệu: TSB-AD-U (64 series của paper, 60 series kiểm chứng ngoài) và KDD21 (250 series)</span>'; return; }
+    if (ST.screen === 'data') { tb.innerHTML = '<span class="meta">Dữ liệu: TSB-AD-U, 64 series của paper</span>'; return; }
     if (!ST.data) { tb.innerHTML = '<span class="meta">Chưa chọn dữ liệu</span>'; return; }
     const m = ST.data.meta, ms = activeMethods().map(k => `<span class="swatch" style="background:${METHOD[k].color}"></span> ${METHOD[k].label}`).join(' &nbsp; ');
     const pol = ST.cfg.policy === 'interactive' ? '<span class="badge inter">Interactive</span>' : esc(POLICY_LABEL[ST.cfg.policy]);
@@ -263,7 +263,7 @@
       const [icon, name] = IL.family(r.family), tag = DEMO_TAG[r.group], missing = ST.cache[r.group] === null;
       return `<button class="scard ${r.group === ST.group ? 'sel' : ''}" data-g="${r.group}" ${missing ? 'disabled title="Chưa có dữ liệu tính sẵn"' : ''}>
         <span class="fi">${icon}</span><span><span class="nm">${r.family} · ${r.group}</span><span class="sub">${name}</span></span>
-        ${tag ? `<span class="tg ${tag}">${{ success: 'Cal. tốt hơn', failure: 'Cal. kém (seed demo)', representative: 'Đại diện' }[tag]}</span>` : ''}</button>`;
+        ${tag ? `<span class="tg ${tag}">${{ success: 'Impr. tốt hơn', failure: 'Impr. kém (seed demo)', representative: 'Đại diện' }[tag]}</span>` : ''}</button>`;
     }).join('') + (ST.userSeries || []).map(u => `<button class="scard ${u.group === ST.group ? 'sel' : ''}" data-g="${u.group}"><span class="fi"></span><span><span class="nm">${esc(u.name)}</span><span class="sub">CoAD train trên file của bạn · ${u.epochs} epoch</span></span></button>`).join('') + (ST.data ? `<div class="sinfo">${ST.data.meta.length.toLocaleString('vi')} điểm đo · học trên ${ST.data.meta.n_train.toLocaleString('vi')} điểm đầu · chu kỳ ${ST.data.meta.period} điểm</div>` : '');
     box.querySelectorAll('.scard').forEach(b => b.onclick = () => { if (+b.dataset.g !== ST.group) { b.querySelector('.sub').textContent = 'Đang tải…'; selectSeries(+b.dataset.g); } });
     if (!ST.data) { $('#cfgMethods').innerHTML = ''; return; }
@@ -336,9 +336,7 @@
     const anyMiss = ms.some(k => ST.results[k].ev.nMissed > 0);
     return `<div class="context explain" style="margin:0 0 12px"><span class="ico">${icon}</span><div style="flex:1">
       <h3>${name} · chuỗi ${m.group}</h3><p class="q">Mô hình có bắt được ${nEv} đoạn bất thường (nền cam) mà ít báo nhầm không?</p>
-      <details class="more" style="margin-top:2px"><summary>Chi tiết</summary><p>${desc}. ${m.length.toLocaleString('vi')} điểm đo; ${m.n_train.toLocaleString('vi')} điểm đầu là phần bình thường để mô hình học.</p>
-      <div class="steps" style="margin-top:6px"><span class="on">① Xem kết quả</span><i>→</i><span>${anyMiss ? '② Bấm một ô đỏ (bỏ sót)' : '② Bấm một ô sự kiện'}</span><i>→</i><span>③ Xem Dấu vết</span><i>→</i><span>④ So sánh với Calibrated</span></div>
-      ${anyMiss ? '' : '<p>Chuỗi này không có đoạn bị bỏ sót. Muốn xem lỗi, chọn chuỗi gắn nhãn "Cal. tốt hơn" ở thanh bên.</p>'}</details></div></div>`;
+      <p>${desc}. ${m.length.toLocaleString('vi')} điểm đo; ${m.n_train.toLocaleString('vi')} điểm đầu là phần bình thường để mô hình học.</p></div></div>`;
   }
   function selectEvent(e, kind = 'gt', method) {
     const ctx = Math.max(ST.data.meta.period * 2, e.b - e.a);
@@ -360,30 +358,29 @@
       <div class="panel"><div class="ph viewbar" id="viewing" style="margin:0"><h2>Tổng quan</h2>
         <span>Đang xem <b class="range num"></b></span><button class="btn small" id="fullBtn">Toàn chuỗi</button>
         <span class="legend-mini" style="margin-left:auto"><span style="--c:#16A34A">phát hiện</span><span style="--c:#F59E0B">một phần</span><span style="--c:#E11D48">bỏ sót</span></span>
-        ${info('Kéo chọn trên dải này để phóng to; ô màu trên thẻ phương pháp = từng sự kiện, bấm để nhảy tới. Click biểu đồ để mở Inspector tại điểm đó.')}</div>
+        ${info('Kéo chọn trên dải này để phóng to; ô màu trên thẻ phương pháp = từng sự kiện, bấm để nhảy tới. Click biểu đồ để xem CoAD xử lý điểm đó ở khung bên dưới.')}</div>
         <div class="chart" id="cOverview" style="height:64px"></div></div>
       <div class="panel"><div class="ph"><h2>Input · ground truth · prediction</h2></div>
-        ${ex(IL.readChart(), '<b>Cách đọc:</b> đường xám là dữ liệu đo theo thời gian. <b>Nền cam</b> = bất thường thật. <b>Thanh màu</b> phía dưới = lúc mô hình báo động. Nền xám ở đầu = phần mô hình dùng để học.')}
         <div class="chart" id="cInput" style="height:280px"></div></div>
       <div class="panel"><div class="ph"><h2>Score + ngưỡng</h2>${info('Mỗi phương pháp một trục, ngưỡng theo thang của chính nó; vùng gạch = warm-up (chưa có score hợp lệ).')}</div>
-        ${ex(IL.threshold(), 'Mô hình chấm <b>điểm bất thường</b> cho từng thời điểm. Vượt <b>vạch đứt</b> (ngưỡng) thì báo động. Mỗi phương pháp có thang điểm riêng nên vẽ trên trục riêng.')}
         <div class="chart" id="cScore" style="height:${Math.max(200, 150 * ms.length)}px"></div></div>
       <div class="panel"><div class="ph"><h2>Input vs reconstruction</h2>${info('Reconstruction của CoAD (lượt tái tạo cuối, code mode), cùng thang với input.')}</div>
-        ${ex(IL.recon(), 'CoAD học cách <b>vẽ lại</b> dữ liệu bình thường (nét đứt xanh). Ở đoạn bất thường, bản vẽ lại <b>lệch xa</b> dữ liệu thật — đó là một tín hiệu để phát hiện.')}
         <div class="chart" id="cRecon" style="height:200px"></div></div>
-      </div>
-      <div class="panel dock" id="dock"><div class="tabs" id="seriesTabs">
-          <button data-t="events">Sự kiện</button><button data-t="trace">Dấu vết</button>
-          <button data-t="insp">Inspector</button><button data-t="config">Cấu hình</button></div>
-        <div class="pb" id="seriesTab"></div></div></div>`;
+      <div class="panel" id="inspPanel"><div class="ph"><h2>Inspector · CoAD xử lý một cửa sổ như thế nào</h2>${info('Click một điểm trên biểu đồ phía trên (hoặc một ô sự kiện ở thẻ phương pháp) để xem cửa sổ chứa điểm đó đi qua từng bước của CoAD.')}</div>
+        <div class="pb" id="inspBox"></div></div>
+      </div></div>`;
     $('#fullBtn').onclick = () => setView(null, null);
     bindJourney(root);
-    $('#seriesTabs').querySelectorAll('button').forEach(b => b.onclick = () => { ST.tab = b.dataset.t; renderSeriesTab(); reveal($('#dock')); });
     root.querySelectorAll('.dots i').forEach(i => i.onclick = () => {
-      selectEvent(ST.results[i.parentNode.dataset.m].ev.events[+i.dataset.k]);
-      if (ST.tab === 'trace' || ST.tab === 'events') renderSeriesTab();
+      const e = ST.results[i.parentNode.dataset.m].ev.events[+i.dataset.k];
+      selectEvent(e);
+      ST.inspT = R.peakIn(ST.data.arr.combined, e.a, e.b).index; ST.inspWin = null; ST.inspPatch = null; renderSeriesTab();
     });
     drawOverview(); drawInput($('#cInput'), ms); drawScores($('#cScore'), ms); drawRecon($('#cRecon'));
+    if (ST.inspT === null || ST.inspT === undefined || ST.inspT >= ST.data.n) {      // start on the first missed (else first) event
+      const evs = ms.length ? ST.results[ms[0]].ev.events : [], e = evs.find(x => x.status === 'missed') || evs[0];
+      ST.inspT = e ? R.peakIn(ST.data.arr.combined, e.a, e.b).index : Math.floor(ST.data.n / 2); ST.inspWin = null; ST.inspPatch = null;
+    }
     updateViewing(); renderSeriesTab();
     if ($('#upGo')) bindUploadPanel();
   }
@@ -472,13 +469,8 @@
   }
 
   function renderSeriesTab() {
-    document.querySelectorAll('#seriesTabs button').forEach(b => b.classList.toggle('active', b.dataset.t === ST.tab));
-    const box = $('#seriesTab');
-    if (!box) return;
-    if (ST.tab === 'events') { box.innerHTML = eventsHTML(); bindEvents(box); return; }
-    if (ST.tab === 'trace') { renderTraceTab(box); return; }
-    if (ST.tab === 'insp') { renderInspector(box); return; }
-    if (ST.tab === 'config') { box.innerHTML = configHTML(); $('#cfgExport').onclick = exportJSON; }
+    const box = $('#inspBox');
+    if (box) renderInspector(box);
   }
 
   /* trace tab: event navigator + evidence bars */
@@ -643,7 +635,7 @@
   /* ---------- Model Inspector ---------- */
   function openInspector(t) {
     ST.inspT = t; ST.inspWin = null; ST.inspPatch = null;
-    if (ST.screen === 'series') { ST.tab = 'insp'; renderSeriesTab(); reveal($('#dock')); }
+    if (ST.screen === 'series') { renderSeriesTab(); reveal($('#inspPanel')); }
     else { ST.ea.tab = 'patch'; renderCaseTab(); reveal($('#caseTabsPanel')); }
   }
   function windowsAt(t) {
@@ -685,8 +677,7 @@
       · điểm ${Math.max(0, s0)}–${s0 + T - 1} ${info('Một thời điểm nằm trong nhiều window chồng lấp; mỗi window được xử lý riêng. Giá trị ở đây là của patch trong window đang chọn, không phải score đã tổng hợp theo thời điểm.')}</div>
       <div class="flow2">${FLOW_STEPS.map((st, k) => `${k ? '<div class="fdown">↓</div>' : ''}<div class="fstep2"><div class="fh2"><span class="fn2">${st.n}</span><b>${st.t}</b></div>
         <div class="fs2">${st.s}</div><div id="fl-${st.id}" style="height:${st.id === 'in' || st.id === 'rec' ? 110 : 80}px"></div></div>`).join('')}</div>
-      <div class="patchbox" id="patchBox" style="margin-top:10px">Click một cột ở bước ②, ④ hoặc ⑤ để xem chi tiết patch đó.</div>
-      <details class="more"><summary>Xem dạng heatmap (7 tín hiệu × patch)</summary><div id="cHeat" style="height:250px"></div></details>`;
+      <div class="patchbox" id="patchBox" style="margin-top:10px">Click một cột ở bước ②, ④ hoặc ⑤ để xem chi tiết patch đó.</div>`;
     box.querySelectorAll('button[data-w]').forEach(b => b.onclick = () => { ST.inspWin = +b.dataset.w; ST.inspPatch = null; renderInspector(box); });
     const a = Math.max(0, s0), b = s0 + T, idx = [], inp = [], rec = [];
     for (let i = a; i < b; i++) { idx.push(i); inp.push(d.arr.input[i]); rec.push(d.arr.reconstruction[i]); }
@@ -708,16 +699,6 @@
       div.on('plotly_click', ev => { ST.inspPatch = ev.points[0].customdata; patchDetail(); });
     });
     if (ST.inspPatch !== null) patchDetail();
-    // optional heatmap view, drawn only when opened
-    const det = box.querySelector('details:last-child');
-    det.addEventListener('toggle', () => {
-      if (!det.open || $('#cHeat').data) return;
-      const rows = [['patch_p_time', 'Time prob.'], ['patch_p_freq', 'Frequency prob.'], ['patch_p_mask', 'A (② phân loại)'],
-                    ['patch_r_time', 'Residual time'], ['patch_r_freq', 'Residual freq.'], ['patch_r_fused', 'Aʳ (④ phần dư)'], ['patch_p_comb', 'A_c (⑤ kết luận)']];
-      Plotly.newPlot($('#cHeat'), [{ z: rows.map(([k]) => Array.from(d.arr[k].subarray(wi * N, wi * N + N))), x: Array.from({ length: N }, (_, j) => j), y: rows.map(r => r[1]),
-        type: 'heatmap', colorscale: 'Viridis', zmin: 0, zmax: 1, hovertemplate: 'patch %{x}<br>%{y}: %{z:.3f}<extra></extra>', colorbar: { thickness: 10, len: 0.9 } }],
-        Object.assign({}, BASE, { margin: { l: 130, r: 10, t: 6, b: 30 }, yaxis: { autorange: 'reversed' } }), cfg);
-    });
   }
   // the clicked time point and the selected patch, drawn on every flow chart
   function flowShapes() {
@@ -764,44 +745,26 @@
     linked = [];
     if (!ST.data) { root.innerHTML = '<div class="panel"><div class="empty">Chọn một chuỗi ở thanh bên trái.</div></div>'; return; }
     const c = errorCases();
-    if (!c) { root.innerHTML = '<div class="panel"><div class="empty">Cần bật cả CoAD gốc và Calibrated ở thanh bên trái để so sánh.</div></div>'; return; }
+    if (!c) { root.innerHTML = '<div class="panel"><div class="empty">Cần bật cả CoAD gốc và Our Improvement ở thanh bên trái để so sánh.</div></div>'; return; }
     const by = k => c.gt.filter(x => x.cmp.kind === k).length;
     const cnt = { missed: c.gt.filter(x => !x.cmp.original.hit).length, partial: c.gt.filter(x => x.cmp.original.status === 'partial').length, fa: c.fa.length,
                   recovered: by('recovered'), lost: by('lost'), both_missed: by('both_missed'), both_hit: by('both_hit') };
     const fc = { coad: ST.results.coad.ev.falseAlarms.length, calibrated: ST.results.calibrated.ev.falseAlarms.length }, dfa = fc.calibrated - fc.coad;
-    const list = filtered(c), flat = [...list.gt, ...list.fa];
+    if (ST.ea.filter === 'fa' || ST.ea.filter === 'missed' || ST.ea.filter === 'partial') ST.ea.filter = 'all';
+    const list = filtered(c), flat = list.gt;
     if (!flat.find(x => x.key === ST.ea.key)) { const pick = flat.find(x => x.type === 'gt' && x.cmp.kind !== 'both_hit') || flat[0]; ST.ea.key = pick ? pick.key : null; }
     const tile = (f, n, label, sub, cls) => `<button class="mtile ${cls} ${ST.ea.filter === f ? 'on' : ''}" data-f="${f}" ${n === 0 ? 'disabled' : ''}><b>${n}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ''}</button>`;
     root.innerHTML = `
-      ${ex(IL.compare(), 'So <b>CoAD gốc</b> với bản cải tiến <b>Calibrated</b> trên cùng các đoạn bất thường. Bấm một ô để lọc danh sách case, rồi chọn case để xem vì sao.')}
-      <div class="ecmp">
+      <div class="ecmp one">
         <div class="panel"><div class="ph"><h2>${c.gt.length} sự kiện thật</h2>${info(R.RULES.comparison + ' Ngưỡng: ' + POLICY_LABEL[ST.cfg.policy] + '.')}</div>
           <div class="pb"><div class="mgrid">
-            <span></span><span class="mh" style="color:${METHOD.calibrated.color}">Calibrated ✓ bắt</span><span class="mh" style="color:${METHOD.calibrated.color}">Calibrated ✗ sót</span>
+            <span></span><span class="mh" style="color:${METHOD.calibrated.color}">Our Improvement ✓ bắt</span><span class="mh" style="color:${METHOD.calibrated.color}">Our Improvement ✗ sót</span>
             <span class="mh rh" style="color:${METHOD.coad.color}">CoAD ✓ bắt</span>${tile('both_hit', cnt.both_hit, 'cả hai bắt', '', 'neutral')}${tile('lost', cnt.lost, 'mới bỏ sót', 'cải tiến làm kém đi', 'bad')}
             <span class="mh rh" style="color:${METHOD.coad.color}">CoAD ✗ sót</span>${tile('recovered', cnt.recovered, 'được cứu', 'cải tiến sửa được', 'good')}${tile('both_missed', cnt.both_missed, 'cả hai sót', '', 'neutral')}
           </div></div></div>
-        <div class="panel"><div class="ph"><h2>Đoạn báo sai</h2>${info(R.RULES.false_alarm + ' Báo riêng, không suy ra từ bảng sự kiện.')}</div>
-          <div class="pb" style="display:flex;flex-direction:column;gap:8px">
-            ${tile('fa', `${fc.coad} → ${fc.calibrated}`, 'CoAD gốc → Calibrated', dfa === 0 ? 'không đổi' : (dfa > 0 ? `tăng ${dfa} đoạn` : `giảm ${-dfa} đoạn`), dfa < 0 ? 'good' : dfa > 0 ? 'bad' : 'neutral')}
-            <button class="btn small ${ST.ea.filter === 'all' ? 'primary' : ''}" data-f="all">Xem tất cả ${c.gt.length + c.fa.length} case</button></div></div>
       </div>
-      <div class="ea"><div class="panel caselist" id="caseList"></div><div id="caseDetail"></div></div>`;
+      <div id="caseDetail"></div>`;
     root.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { ST.ea.filter = ST.ea.filter === b.dataset.f && b.dataset.f !== 'all' ? 'all' : b.dataset.f; renderErrors(); });
-    const cl = $('#caseList'), cols = 'grid-template-columns:1fr 86px 86px';
-    const item = x => x.type === 'gt'
-      ? `<div class="evrow ${x.key === ST.ea.key ? 'sel' : ''}" style="${cols}" data-k="${x.key}"><span><b>${x.id}</b><small>${KIND_LABEL[x.cmp.kind]} · ${x.b - x.a} điểm</small></span>${pill('coad', x.cmp.original)}${pill('calibrated', x.cmp.improved)}</div>`
-      : `<div class="evrow fa ${x.key === ST.ea.key ? 'sel' : ''}" data-k="${x.key}"><span><b>${x.id}</b><small>${x.a.toLocaleString('vi')}–${(x.b - 1).toLocaleString('vi')} · ${x.b - x.a} điểm</small></span>
-          <span class="spill" style="background:color-mix(in srgb, ${METHOD[x.method].color} 14%, #fff);color:${METHOD[x.method].color}">${METHOD[x.method].label}</span></div>`;
-    const f = ST.ea.filter, fl = FILTERS.find(([k]) => k === f);
-    cl.innerHTML = `<div class="fchips" style="padding:8px 8px 0">${[['missed', 'CoAD bỏ sót'], ['partial', 'CoAD một phần']].map(([k, l]) =>
-        `<button data-cf="${k}" class="${f === k ? 'on' : ''}" ${cnt[k] === 0 ? 'disabled' : ''}>${l} <b>${cnt[k]}</b></button>`).join('')}
-        ${f !== 'all' ? `<button data-cf="all">✕ ${fl ? fl[1] : ''}</button>` : ''}</div>`
-      + (list.gt.length ? `<div class="evhead" style="${cols}"><span>Sự kiện · ${list.gt.length}</span><span style="color:${METHOD.coad.color}">CoAD</span><span style="color:${METHOD.calibrated.color}">Calibrated</span></div>` + list.gt.map(item).join('') : '')
-      + (list.fa.length ? `<div class="evgroup">Đoạn báo sai · ${list.fa.length}</div>` + list.fa.slice(0, 400).map(item).join('') : '')
-      + (!flat.length ? '<div class="empty">Không có case nào trong nhóm này.</div>' : '');
-    cl.querySelectorAll('[data-cf]').forEach(b => b.onclick = () => { ST.ea.filter = b.dataset.cf; renderErrors(); });
-    cl.querySelectorAll('.evrow').forEach(e => e.onclick = () => { ST.ea.key = e.dataset.k; renderErrors(); });
     ST.ea.flat = flat;
     renderCaseDetail();
   }
@@ -811,7 +774,7 @@
     const x = flat[k], d = ST.data, ctx = Math.max(d.meta.period * 2, x.b - x.a);
     ST.view = [Math.max(0, x.a - ctx), Math.min(d.n - 1, x.b + ctx)];
     const head = x.type === 'gt'
-      ? `<span class="badge">${x.a.toLocaleString('vi')}–${(x.b - 1).toLocaleString('vi')} · ${x.b - x.a} điểm</span> CoAD ${pill('coad', x.cmp.original)} Calibrated ${pill('calibrated', x.cmp.improved)}`
+      ? `<span class="badge">${x.a.toLocaleString('vi')}–${(x.b - 1).toLocaleString('vi')} · ${x.b - x.a} điểm</span> CoAD ${pill('coad', x.cmp.original)} Our Improvement ${pill('calibrated', x.cmp.improved)}`
       : `<span class="badge">${x.a.toLocaleString('vi')}–${(x.b - 1).toLocaleString('vi')} · ${x.b - x.a} điểm</span> <span class="note">mô hình ${METHOD[x.method].label} báo động, không có bất thường thật</span>`;
     box.innerHTML = `<div class="panel"><div class="ph"><h2>${x.type === 'gt' ? 'Event ' + x.id + ' · ' + KIND_LABEL[x.cmp.kind] : 'Báo nhầm ' + x.id + ' · ' + METHOD[x.method].label}</h2>
         <span class="spacer" style="flex:1"></span><button class="btn small" id="prevCase" ${k === 0 ? 'disabled' : ''}>Trước</button><button class="btn small" id="nextCase" ${k === flat.length - 1 ? 'disabled' : ''}>Sau</button></div>
@@ -819,7 +782,7 @@
       <div class="panel"><div class="ph"><h2>Input · GT · prediction</h2></div><div id="eInput" style="height:240px"></div></div>
       <div class="panel"><div class="ph"><h2>Reconstruction & error</h2></div><div id="eRecon" style="height:220px"></div></div>
       <div class="panel"><div class="ph"><h2>Score trước / sau làm mượt</h2><span class="legend-mini"><span style="--c:#94A3B8">chấm = trước làm mượt</span><span style="--c:#334155">liền = score cuối</span><span style="--c:#CBD5E1">đứt = ngưỡng</span></span></div><div id="eScore" style="height:300px"></div></div>
-      <div class="panel" id="caseTabsPanel"><div class="tabs" id="caseTabs"><button data-t="obs">Dấu vết tín hiệu</button><button data-t="patch">Chi tiết patch</button><button data-t="note">Ghi chú</button></div><div class="pb" id="caseTab"></div></div>`;
+      <div class="panel" id="caseTabsPanel"><div class="tabs" id="caseTabs"><button data-t="patch">Chi tiết patch</button><button data-t="note">Ghi chú</button></div><div class="pb" id="caseTab"></div></div>`;
     $('#prevCase').onclick = () => { ST.ea.key = flat[k - 1].key; renderErrors(); };
     $('#nextCase').onclick = () => { ST.ea.key = flat[k + 1].key; renderErrors(); };
     const band = { type: 'rect', xref: 'x', yref: 'paper', x0: x.a, x1: x.b, y0: 0, y1: 1, line: { color: '#EA580C', width: 1, dash: 'dot' }, fillcolor: 'rgba(0,0,0,0)' };
@@ -828,6 +791,7 @@
     drawScores($('#eScore'), ['coad', 'calibrated'], { pre: true, layout: {} });
     $('#caseTabs').querySelectorAll('button').forEach(b => b.onclick = () => { ST.ea.tab = b.dataset.t; renderCaseTab(); reveal($('#caseTabsPanel')); });
     ST.inspT = R.peakIn(d.arr.combined, x.a, x.b).index; ST.inspWin = null; ST.inspPatch = null;
+    if (ST.ea.tab !== 'patch' && ST.ea.tab !== 'note') ST.ea.tab = 'patch';
     renderCaseTab();
   }
   function renderCaseTab() {
@@ -863,36 +827,28 @@
     const mlabel = { VUS_PR: 'VUS-PR', auc_prc: 'AUC-PR', R_AUC_PR: 'R-AUC-PR', f1_score: 'F1' };
     const mC = mean(rows.map(r => r[k + '_coad'])), mK = mean(rows.map(r => r[k + '_cal'])), mD = mean(rows.map(r => r.delta)), nn = Math.max(1, rows.length);
     root.innerHTML = `
-      <div class="panel"><div class="ph"><h2>Calibrated so với CoAD gốc</h2>${info(B.aggregation)}</div>
+      <div class="panel"><div class="ph"><h2>Our Improvement so với CoAD gốc</h2>${info(B.aggregation)}</div>
         <div class="pb"><div class="filters">
           <div><label>Family</label><select id="fFam"><option value="all">Tất cả</option>${fams.map(x => `<option ${f.family === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
           <div><label>Tập</label><select id="fSplit"><option value="all">Tất cả</option><option value="design" ${f.split === 'design' ? 'selected' : ''}>Thiết kế (30)</option><option value="confirmation" ${f.split === 'confirmation' ? 'selected' : ''}>Xác nhận (34)</option></select></div>
           <div><label>Metric</label><select id="fMetric">${Object.entries(mlabel).map(([a, b]) => `<option value="${a}" ${f.metric === a ? 'selected' : ''}>${b}</option>`).join('')}</select></div>
           <div><label>Sắp xếp</label><select id="fSort"><option value="delta">Theo delta</option><option value="family" ${f.sort === 'family' ? 'selected' : ''}>Theo family</option></select></div></div>
-          ${missing.length ? `<div class="warnbox" style="margin-top:10px">${missing.length} series N/A (không tính) ${info(`Không có ${mlabel[k]} của Calibrated: ` + (missing.every(r => r.split === 'design') ? 'tập thiết kế chỉ được chấm nhanh bằng AUC-PR riêng của M11 lúc chọn phương án, không chạy evaluator đầy đủ.' : 'thiếu kết quả.') + ' Chọn Tập = Xác nhận để xem phần kiểm tra độc lập.')}</div>` : ''}
-          <div class="warnbox" style="margin-top:10px;background:#F5F3FF;border-color:#DDD6FE;color:#5B21B6">Các số bên dưới là trên <b>${f.split === 'confirmation' ? 'tập xác nhận (kiểm tra độc lập)' : f.split === 'design' ? 'tập thiết kế (đã dùng để chọn phương án)' : 'cả hai tập'}</b>, trung bình 3 seed. Trên 60 series của 12 family khác, Calibrated <b>không</b> hơn CoAD ổn định (báo cáo mục 9).</div>
-          <details class="more"><summary>Nguồn số liệu</summary>${esc(B.source.coad)}; ${esc(B.source.calibrated)}. ${esc(B.source.split)}. Tập thiết kế đã được dùng để chọn phương án. Kiểm chứng ngoài: báo cáo mục 9.</details></div></div>
+          ${missing.length ? `<div class="warnbox" style="margin-top:10px">${missing.length} series N/A (không tính) ${info(`Không có ${mlabel[k]} của Our Improvement: ` + (missing.every(r => r.split === 'design') ? 'tập thiết kế chỉ được chấm nhanh bằng AUC-PR riêng của M11 lúc chọn phương án, không chạy evaluator đầy đủ.' : 'thiếu kết quả.') + ' Chọn Tập = Xác nhận để xem phần kiểm tra độc lập.')}</div>` : ''}
+          <div class="note" style="margin-top:8px">Trung bình 3 seed. Trên 60 series của 12 family khác, Our Improvement không hơn CoAD ổn định (báo cáo mục 9). ${info(B.source.coad + '; ' + B.source.calibrated + '. ' + B.source.split + '.')}</div></div></div>
       <div class="kpis">
         <div class="kpi"><div class="v">${rows.length}</div><div class="l">series có ${mlabel[k]} · ${f.split === 'confirmation' ? 'tập xác nhận' : f.split === 'design' ? 'tập thiết kế' : 'mọi tập'}</div></div>
         <div class="kpi accent" style="--c:${METHOD.coad.color}"><div class="v">${pts(mC)}</div><div class="l">CoAD gốc (trung bình)</div></div>
-        <div class="kpi accent" style="--c:${METHOD.calibrated.color}"><div class="v">${pts(mK)}</div><div class="l">Calibrated (trung bình)</div></div>
+        <div class="kpi accent" style="--c:${METHOD.calibrated.color}"><div class="v">${pts(mK)}</div><div class="l">Our Improvement (trung bình)</div></div>
         <div class="kpi ${mD > tol ? 'good' : mD < -tol ? 'bad' : ''}"><div class="v">${mD >= 0 ? '+' : ''}${pts(mD)}</div><div class="l">Δ trung bình (điểm)</div></div>
         <div class="kpi"><div class="v" style="font-size:18px"><span style="color:var(--ok)">▲${up}</span> · <span style="color:var(--bad)">▼${down}</span> · =${tie}</div>
           <div class="updown"><span style="width:${100 * up / nn}%;background:#16A34A"></span><span style="width:${100 * tie / nn}%;background:#CBD5E1"></span><span style="width:${100 * down / nn}%;background:#E11D48"></span></div>
           <div class="l">tăng · giảm · hòa ${info('Hòa khi |Δ| ≤ ' + (tol * 100).toFixed(1) + ' điểm')}</div></div></div>
-      <div class="panel"><div class="ph"><h2>Δ ${mlabel[k]} = Calibrated − CoAD gốc (điểm)</h2></div>
-        ${ex(IL.delta(), `Mỗi thanh là <b>một chuỗi</b>. Thanh <b>xanh, sang phải</b>: Calibrated tốt hơn CoAD gốc trên chuỗi đó; <b>đỏ, sang trái</b>: kém hơn. ${mlabel[k]} là điểm 0–100, càng cao càng tốt.`)}<div id="cDelta" style="height:${Math.max(260, rows.length * 16 + 60)}px"></div></div>
-      <div class="panel"><div class="ph"><h2>Case gallery</h2>${info('5 series có checkpoint trong demo, gồm cả case Calibrated kém hơn. Δ là trung bình 3 seed (46–48); thẻ dựa trên checkpoint demo (seed 46), nên có thể khác dấu (series 269). Thẻ là metadata trình bày, không phải dự đoán. Click để mở Phân tích chuỗi.')}</div>
-        <div class="pb"><div class="kpis" style="margin:0">${B.rows.filter(r => r.demo).sort((a, b) => (b.VUS_PR_cal - b.VUS_PR_coad) - (a.VUS_PR_cal - a.VUS_PR_coad)).map(r => {
-          const dd = r.VUS_PR_cal - r.VUS_PR_coad, tag = DEMO_TAG[r.group];
-          return `<div class="kpi accent gal" data-g="${r.group}" style="--c:${dd > tol ? '#16A34A' : dd < -tol ? '#E11D48' : '#94A3B8'};cursor:pointer">
-            <div class="l"><b style="color:var(--text)">${r.family} · ${r.group}</b> ${tag ? `<span class="badge">${TAG_LABEL[tag]}</span>` : ''}</div>
-            <div class="v" style="color:${dd > tol ? 'var(--ok)' : dd < -tol ? 'var(--bad)' : 'inherit'}">${dd >= 0 ? '+' : ''}${pts(dd)}</div>
-            <div class="l">VUS-PR ${pts(r.VUS_PR_coad)} → ${pts(r.VUS_PR_cal)} · ${r.split === 'design' ? 'thiết kế' : 'xác nhận'}</div></div>`; }).join('')}</div></div></div>
-      <div class="panel"><div class="ph"><h2>Theo family (trung bình các series)</h2></div><div class="pb"><table><thead><tr><th>Family</th><th class="r">Series</th><th class="r">CoAD gốc</th><th class="r">Calibrated</th><th class="r">Δ</th></tr></thead><tbody>
+      <div class="panel"><div class="ph"><h2>Δ ${mlabel[k]} = Our Improvement − CoAD gốc (điểm)</h2></div>
+        <div id="cDelta" style="height:${Math.max(260, rows.length * 16 + 60)}px"></div></div>
+      <div class="panel"><div class="ph"><h2>Theo family (trung bình các series)</h2></div><div class="pb"><table><thead><tr><th>Family</th><th class="r">Series</th><th class="r">CoAD gốc</th><th class="r">Our Improvement</th><th class="r">Δ</th></tr></thead><tbody>
         ${famRows.map(x => `<tr><td>${x.fm}</td><td class="r">${x.n}</td><td class="r">${pts(x.coad)}</td><td class="r">${pts(x.cal)}</td><td class="r">${(x.cal - x.coad >= 0 ? '+' : '')}${pts(x.cal - x.coad)}</td></tr>`).join('')}</tbody></table></div></div>
       <details class="panel" style="padding:0"><summary class="ph" style="cursor:pointer"><h2>Bảng chi tiết (${rows.length} series) ▾</h2><span class="sub">click dòng có dữ liệu demo để mở phân tích chuỗi</span></summary><div class="pb tablewrap" style="max-height:480px"><table><thead><tr>
-        <th>Series</th><th>Family</th><th>Tập</th><th class="r">Seed</th><th class="r">CoAD (± SD)</th><th class="r">Calibrated (± SD)</th><th class="r">Δ</th><th class="r">KMeansAD VUS-PR</th><th>Demo</th></tr></thead><tbody>
+        <th>Series</th><th>Family</th><th>Tập</th><th class="r">Seed</th><th class="r">CoAD (± SD)</th><th class="r">Our Improvement (± SD)</th><th class="r">Δ</th><th class="r">KMeansAD VUS-PR</th><th>Demo</th></tr></thead><tbody>
         ${rows.map(r => `<tr data-g="${r.group}" ${r.demo ? '' : 'style="cursor:default"'}><td>${r.group}</td><td>${r.family}</td><td>${r.split === 'design' ? 'thiết kế' : 'xác nhận'}</td><td class="r">${r.seeds.join(',')}</td>
           <td class="r">${pts(r[k + '_coad'])}${r[k + '_coad_sd'] !== null ? ' ± ' + pts(r[k + '_coad_sd']) : ''}</td><td class="r">${pts(r[k + '_cal'])}${r[k + '_cal_sd'] !== null ? ' ± ' + pts(r[k + '_cal_sd']) : ''}</td>
           <td class="r">${r.delta >= 0 ? '+' : ''}${pts(r.delta)}</td><td class="r">${pts(r.VUS_PR_kmeans)}</td><td>${r.demo ? 'có' : '—'}</td></tr>`).join('')}</tbody></table></div></details>`;
@@ -910,7 +866,7 @@
 
   /* ---------- screen: data ----------
      dataset cards on top (pick one to explore), family tiles, a length × anomaly-ratio scatter, a compact series list */
-  const TAG_LABEL = { success: 'Calibrated tốt hơn', failure: 'Kém hơn ở checkpoint demo', representative: 'Đại diện' };
+  const TAG_LABEL = { success: 'Our Improvement tốt hơn', failure: 'Kém hơn ở checkpoint demo', representative: 'Đại diện' };
   const DEMO_TAG = { 237: 'success', 276: 'success', 234: 'representative', 269: 'failure', 295: 'failure' };
   const FAM_COLORS = ['#B45309', '#DB2777', '#65A30D', '#0891B2', '#64748B', '#CA8A04', '#EA580C', '#BE185D', '#4D7C0F', '#0E7490', '#A16207', '#475569', '#9F1239', '#15803D', '#7C2D12', '#334155', '#C2410C'];
   async function renderData() {
@@ -921,7 +877,7 @@
       catch (e) { root.innerHTML = `<div class="panel"><div class="empty">Không đọc được data/datasets.json (${esc(e.message)}). Chạy tools/build_datasets.js.</div></div>`; return; }
     }
     const D = ST.datasets, f = ST.dataFilter || (ST.dataFilter = { set: 'paper', family: 'all' });
-    if (f.set === 'upload' && !ST.upload) f.set = 'paper';
+    if ((f.set === 'upload' && !ST.upload) || f.set === 'external' || f.set === 'kdd21') f.set = 'paper';
     const sumEv = l => l.reduce((s, r) => s + r.events, 0).toLocaleString('vi'), nFam = l => new Set(l.map(r => r.family)).size;
     const card = (key, color, icon, title, big, sub, role) => `<button class="dcard ${f.set === key ? 'sel' : ''}" data-set="${key}" style="--c:${color}">
         <span class="dic">${icon}</span><span class="dt">${title}</span><span class="dv">${big}</span><span class="ds">${sub}</span><span class="dr">${role}</span></button>`;
@@ -931,19 +887,15 @@
     else if (f.set === 'kdd21') body = kddHTML(k);
     else body = setHTML(f.set === 'paper' ? D.paper : D.external, f);
     root.innerHTML = `
-      ${exText('Chọn một bộ dữ liệu để xem chi tiết. Mỗi <b>series</b> là một chuỗi đo theo thời gian; một <b>sự kiện</b> là một đoạn bất thường liên tục do người gán nhãn.')}
       <div class="dcards">
         ${card('paper', '#2563EB', '', 'TSB-AD · 64 series của paper', D.paper.length, `${nFam(D.paper)} family · ${sumEv(D.paper)} sự kiện`, 'Tái lập Table 1 · thử cải tiến')}
-        ${card('external', '#B45309', '', 'Kiểm chứng ngoài', D.external.length, `${nFam(D.external)} family khác · ${sumEv(D.external)} sự kiện`, 'Cải tiến có tổng quát không?')}
-        ${card('kdd21', '#0F766E', '', 'KDD21 (UCR 2021)', k.series, 'mỗi series 1 sự kiện', 'Cột KDD21 của Table 1')}
         ${card('upload', '#7C3AED', '', 'Dữ liệu của bạn', ST.upload ? ST.upload.rows.length.toLocaleString('vi') : '+', ST.upload ? esc(ST.upload.name) : 'kéo thả CSV vào thanh bên', ST.upload ? 'Phân tích mô tả' : 'Bấm để chọn file')}
       </div>
       ${body}
       <details class="more" style="margin:4px 2px 16px"><summary>Cách tiền xử lý và chia tập</summary><ul class="note" style="margin:6px 0 0 18px;padding:0">
         <li>Mọi series đơn biến, có nhãn từng điểm. Phần học là đoạn đầu chuỗi (độ dài ghi trong tên file); loader của tác giả chấm điểm toàn chuỗi.</li>
         <li>Min–max theo phần học. Không tự nội suy hay lấy mẫu lại.</li>
-        <li>Thiết kế / xác nhận: 30 / 34 series, <code>default_rng(2026)</code>. Tập ngoài: 5 series mỗi family, <code>default_rng(2027)</code>, bỏ file trùng.</li>
-        <li>KDD21 dựng lại từ archive gốc, khớp 250/250 series với <code>all_length.csv</code> của tác giả. Metadata tính bằng tools/build_datasets.js (${esc(D.built)}).</li></ul></details>`;
+        <li>Thiết kế / xác nhận: 30 / 34 series, <code>default_rng(2026)</code>.</li></ul></details>`;
     root.querySelectorAll('.dcard').forEach(b => b.onclick = () => {
       if (b.dataset.set === 'upload' && !ST.upload) { $('#csvFile').click(); return; }
       f.set = b.dataset.set; f.family = 'all'; renderData();
@@ -957,36 +909,14 @@
     return Object.entries(by).sort();
   }
   function setHTML(list, f) {
-    const fams = famStats(list), maxRatio = Math.max(...fams.map(([, b]) => b.anom / b.pts));
-    const rows = list.filter(r => f.family === 'all' || r.family === f.family), paper = f.set === 'paper';
-    return `<div class="panel"><div class="ph"><h2>Family</h2><span class="note">bấm để lọc</span>${f.family !== 'all' ? '<button class="btn small" id="famAll" style="margin-left:auto">Bỏ lọc</button>' : ''}</div>
-      <div class="pb"><div class="ftiles">${fams.map(([fm, b], i) => { const [ic, nm] = IL.family(fm), ratio = b.anom / b.pts; return `<button class="ftile ${f.family === fm ? 'sel' : ''}" data-fam="${fm}" style="--c:${FAM_COLORS[i % FAM_COLORS.length]}">
-          <span class="fh"><span class="famicon">${ic}</span><b>${fm}</b></span>${nm !== fm ? `<span class="fn">${nm}</span>` : ''}
-          <span class="fs">${b.n} series · ${b.ev.toLocaleString('vi')} sự kiện</span>
-          <span class="fbar" title="Tỉ lệ điểm bất thường ${(100 * ratio).toFixed(2)}%"><i style="width:${(100 * ratio / maxRatio).toFixed(0)}%"></i></span><span class="fs">${(100 * ratio).toFixed(1)}% điểm bất thường</span></button>`; }).join('')}</div></div></div>
-      <div class="split3">
-        <div class="panel"><div class="ph"><h2>Độ dài × tỉ lệ bất thường</h2>${info('Mỗi chấm là một series. Trục ngang: số điểm (thang log). Trục dọc: % điểm được gán bất thường. Chấm viền đen = có checkpoint trong demo.')}</div><div id="dScatter" style="height:300px"></div></div>
-        <div class="panel"><div class="ph"><h2>Series${f.family !== 'all' ? ' · ' + f.family : ''}</h2><span class="note">${rows.length}</span></div>
-          <div class="evlist" style="max-height:300px;border:0;border-radius:0">${rows.map(r => `<div class="evrow srow ${r.demo && paper ? 'demo' : ''}" data-g="${r.group}">
-            <span><b>${IL.family(r.family)[0]} ${r.family} · ${r.group}</b><small>${r.length.toLocaleString('vi')} điểm · ${r.events} sự kiện · ${(100 * r.anomaly_ratio).toFixed(1)}% bất thường${paper ? ' · tập ' + (r.split === 'design' ? 'thiết kế' : 'xác nhận') : ''}</small></span>
-            ${r.demo && paper ? '<span class="spill hit" title="Có checkpoint: bấm để mở Phân tích chuỗi">mở</span>' : ''}</div>`).join('')}</div></div></div>`;
+    const rows = list, paper = f.set === 'paper';
+    return `<div class="panel"><div class="ph"><h2>Series</h2><span class="note">${rows.length}</span></div>
+          <div class="evlist" style="max-height:520px;border:0;border-radius:0">${rows.map(r => `<div class="evrow srow ${r.demo && paper ? 'demo' : ''}" data-g="${r.group}">
+            <span><b>${r.family} · ${r.group}</b><small>${r.length.toLocaleString('vi')} điểm · ${r.events} sự kiện · ${(100 * r.anomaly_ratio).toFixed(1)}% bất thường${paper ? ' · tập ' + (r.split === 'design' ? 'thiết kế' : 'xác nhận') : ''}</small></span>
+            ${r.demo && paper ? '<span class="spill hit" title="Có checkpoint: bấm để mở Phân tích chuỗi">mở</span>' : ''}</div>`).join('')}</div></div>`;
   }
   function bindSet(list, f) {
-    const root = $('#screen-data');
-    root.querySelectorAll('.ftile').forEach(b => b.onclick = () => { f.family = f.family === b.dataset.fam ? 'all' : b.dataset.fam; renderData(); });
-    if ($('#famAll')) $('#famAll').onclick = () => { f.family = 'all'; renderData(); };
-    root.querySelectorAll('.srow.demo').forEach(r => r.onclick = () => { selectSeries(+r.dataset.g); go('series'); });
-    const fams = famStats(list).map(([fm]) => fm);
-    const traces = fams.map((fm, i) => {
-      const rs = list.filter(r => r.family === fm);
-      return { type: 'scatter', mode: 'markers', name: fm, x: rs.map(r => r.length), y: rs.map(r => 100 * r.anomaly_ratio), text: rs.map(r => `${fm} · ${r.group}`),
-        marker: { size: rs.map(r => (r.demo && f.set === 'paper' ? 11 : 8)), color: FAM_COLORS[i % FAM_COLORS.length], opacity: f.family === 'all' || f.family === fm ? 0.85 : 0.12,
-          line: { width: rs.map(r => (r.demo && f.set === 'paper' ? 2 : 0)), color: '#0F172A' } },
-        hovertemplate: '%{text}<br>%{x:,} điểm · %{y:.2f}% bất thường<extra></extra>' };
-    });
-    Plotly.newPlot($('#dScatter'), traces, Object.assign({}, BASE, { margin: { l: 44, r: 8, t: 8, b: 36 }, hovermode: 'closest',
-      xaxis: { type: 'log', title: { text: 'số điểm (log)', font: { size: 11 } } }, yaxis: { title: { text: '% bất thường', font: { size: 11 } } },
-      legend: { orientation: 'h', y: -0.25, font: { size: 10 } } }), { displaylogo: false, responsive: true, displayModeBar: false });
+    $('#screen-data').querySelectorAll('.srow.demo').forEach(r => r.onclick = () => { selectSeries(+r.dataset.g); go('series'); });
   }
   function kddHTML(k) {
     const t = (label, s, unit = '') => `<div class="kstat"><span class="l">${label}</span><div class="kline"><span>${s.min.toLocaleString('vi')}</span><i></i><b>${s.median.toLocaleString('vi')}</b><i></i><span>${s.max.toLocaleString('vi')}</span></div><span class="u">min · trung vị · max${unit}</span></div>`;
@@ -1289,7 +1219,7 @@
     else ST.inspT = R.peakIn(score('coad'), ST.data.meta.valid_from, ST.data.n).index;   // no labels: the highest score
     ST.inspWin = null; ST.inspPatch = null; ST.tab = 'insp'; renderSeriesTab(); reveal($('#dock'));
   }
-  /* ④ results: CoAD, Calibrated and the in-browser KMeansAD on the same file and the same event rules */
+  /* ④ results: CoAD, Our Improvement and the in-browser KMeansAD on the same file and the same event rules */
   async function storyStep4(g) {
     if (ST.group !== g) await selectSeries(g);
     ST.story = 4; go('series');
@@ -1419,7 +1349,7 @@
       <p><b>Đây là demo nghiên cứu với kết quả tính sẵn.</b> Không có training/inference trên web, không có model tổng quát cho CSV mới (upload chỉ kiểm tra và xem trước).</p>
       <h3>Mô hình và dữ liệu</h3><ul>
         <li>CoAD được cài đặt lại (code mode, khớp code tác giả, T4 &lt; 1e-5). Mỗi series demo dùng đúng checkpoint GPU của benchmark (runs/reimpl, seed 46, 300 epoch); score tính lại khớp score đã lưu của benchmark (sai khác tối đa ghi trong Cấu hình lần chạy). Mỗi checkpoint được train riêng cho một series.</li>
-        <li><b>Calibrated</b> (M11, B1): mỗi nhánh đã xử lý được chia cho độ lệch chuẩn của nó trên phần train trước khi gộp. Không dùng nhãn. Là phương án thử nghiệm: tăng trên tập xác nhận nhưng không tổng quát trên 12 family ngoài.</li>
+        <li><b>Our Improvement</b> (M11, B1): mỗi nhánh đã xử lý được chia cho độ lệch chuẩn của nó trên phần train trước khi gộp. Không dùng nhãn. Là phương án thử nghiệm: tăng trên tập xác nhận nhưng không tổng quát trên 12 family ngoài.</li>
         <li><b>KMeansAD</b>: baseline_compare.py của tác giả; score tính trên chính chuỗi test, nên ngưỡng mặc định là μ+3σ của chính score đó (không có phần train).</li>
         <li>Dữ liệu: TSB-AD-U; phần train là đoạn đầu của chuỗi (nền xám), toàn chuỗi được chấm điểm như loader của tác giả.</li></ul>
       <h3>Ngưỡng</h3><ul><li>Train μ + 3σ và Max trên phần train: tính trên score của phần train (không dùng nhãn), riêng cho từng phương pháp theo thang của nó.</li>
@@ -1483,7 +1413,7 @@
     { screen: 'series', sel: '.mcards', t: '3. Kết quả từng phương pháp', p: 'Số lớn là số đoạn bất thường bắt được trên tổng số. Mỗi ô vuông là một đoạn: xanh = bắt được, đỏ = bỏ sót. Bấm một ô để phóng to tới đoạn đó.' },
     { screen: 'series', sel: '#cInput', t: '4. Dữ liệu và chỗ mô hình báo động', p: 'Đường xám là dữ liệu. Nền cam là bất thường thật. Thanh màu bên dưới là lúc mô hình báo động; trùng nền cam là bắt đúng.' },
     { screen: 'series', sel: '#cScore', t: '5. Điểm bất thường', p: 'Mô hình chấm điểm cho từng thời điểm. Điểm vượt vạch đứt (ngưỡng) thì báo động.' },
-    { screen: 'series', sel: '#dock', t: '6. Xem chi tiết', p: 'Tab Dấu vết cho thấy tín hiệu ở từng bước tính của mô hình; nút "So sánh" mở màn hình Phân tích lỗi cho đúng đoạn đó.' },
+    { screen: 'series', sel: '#inspPanel', t: '6. CoAD chạy thế nào', p: 'Inspector cho thấy một cửa sổ dữ liệu đi qua từng bước của CoAD: phân loại patch, che rồi vẽ lại, kiểm tra phần dư, kết luận. Click một điểm trên biểu đồ để đổi cửa sổ.' },
     { screen: 'series', sel: 'header nav', t: '7. Các màn hình khác', p: 'Phân tích lỗi: so CoAD với bản cải tiến trên từng đoạn. Kết quả thực nghiệm: tổng hợp trên nhiều chuỗi. Dữ liệu: mô tả các bộ dữ liệu và phân tích file CSV của bạn.' },
   ];
   let tourI = -1, hole = null, pop = null;

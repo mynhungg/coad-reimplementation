@@ -229,7 +229,7 @@ def build_series(repo, group, epochs, out_dir, raw_files, ckpt_root=None):
         'methods': {
             'coad': {'label': 'CoAD gốc', 'score': 'coad_final', 'pre': 'coad_pre',
                      'thresholds': stage_train['coad_final'], 'metrics': metrics(test['coad_final'], series)},
-            'calibrated': {'label': 'Calibrated', 'score': 'cal_final', 'pre': 'cal_pre',
+            'calibrated': {'label': 'Our Improvement', 'score': 'cal_final', 'pre': 'cal_pre',
                            'thresholds': stage_train['cal_final'], 'metrics': metrics(test['cal_final'], series)},
             'kmeans': {'label': 'KMeansAD', 'score': 'kmeans_final', 'pre': None,
                        'thresholds': {'self_mu3sd': float(km_valid.mean() + 3 * km_valid.std()),

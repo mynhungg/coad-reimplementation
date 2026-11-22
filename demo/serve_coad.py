@@ -168,7 +168,7 @@ def run_job(job, req):
             'stage_thresholds': stage_train,
             'methods': {
                 'coad': {'label': 'CoAD gốc', 'score': 'coad_final', 'pre': 'coad_pre', 'thresholds': stage_train['coad_final'], 'metrics': metrics(test['coad_final'])},
-                'calibrated': {'label': 'Calibrated', 'score': 'cal_final', 'pre': 'cal_pre', 'thresholds': stage_train['cal_final'], 'metrics': metrics(test['cal_final'])},
+                'calibrated': {'label': 'Our Improvement', 'score': 'cal_final', 'pre': 'cal_pre', 'thresholds': stage_train['cal_final'], 'metrics': metrics(test['cal_final'])},
             },
         }
         (DATA / f'series_{group}.json').write_text(json.dumps(pc.clean(meta), indent=1, allow_nan=False), encoding='utf-8')
