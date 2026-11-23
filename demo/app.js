@@ -515,6 +515,10 @@
   function pill(m, x) {
     return `<span class="spill ${x.status}" title="${METHOD[m].label}: ${STATUS_VI[x.status]} · coverage ${pct(x.coverage)} · peak ${fmt(x.peak.value, 4)} · delay ${x.delay === null ? 'N/A' : x.delay}">${ST_ICON[x.status]} ${x.status === 'partial' ? Math.round(100 * x.coverage) + '%' : STATUS_VI[x.status]}</span>`;
   }
+  function erow(m, x) {
+    const extra = x.status === 'partial' ? ` <span class="muted">· phủ ${Math.round(100 * x.coverage)}% đoạn</span>` : '';
+    return `<span class="k"><i class="edot" style="background:${METHOD[m].color}"></i>${METHOD[m].label}</span><span><b class="st ${x.status}">${ST_ICON[x.status]} ${STATUS_VI[x.status]}</b>${extra}</span>`;
+  }
   /* events tab: one compact row per event, a status pill per method; false alarms in their own view */
   function eventsHTML() {
     const ms = activeMethods();
@@ -777,7 +781,7 @@
     const x = flat[k], d = ST.data, ctx = Math.max(d.meta.period * 2, x.b - x.a);
     ST.view = [Math.max(0, x.a - ctx), Math.min(d.n - 1, x.b + ctx)];
     const head = x.type === 'gt'
-      ? `<span class="badge">${x.a.toLocaleString('vi')}–${(x.b - 1).toLocaleString('vi')} · ${x.b - x.a} điểm</span> CoAD ${pill('coad', x.cmp.original)} Our Improvement ${pill('calibrated', x.cmp.improved)}`
+      ? `<div class="ehead"><span class="k">Vị trí</span><span>${x.a.toLocaleString('vi')}–${(x.b - 1).toLocaleString('vi')} <span class="muted">· dài ${x.b - x.a} điểm</span></span>${erow('coad', x.cmp.original)}${erow('calibrated', x.cmp.improved)}</div>`
       : `<span class="badge">${x.a.toLocaleString('vi')}–${(x.b - 1).toLocaleString('vi')} · ${x.b - x.a} điểm</span> <span class="note">mô hình ${METHOD[x.method].label} báo động, không có bất thường thật</span>`;
     box.innerHTML = `<div class="panel"><div class="ph"><h2>${x.type === 'gt' ? 'Event ' + x.id + ' · ' + KIND_LABEL[x.cmp.kind] : 'Báo nhầm ' + x.id + ' · ' + METHOD[x.method].label}</h2>
         <span class="spacer" style="flex:1"></span><button class="btn small" id="prevCase" ${k === 0 ? 'disabled' : ''}>Trước</button><button class="btn small" id="nextCase" ${k === flat.length - 1 ? 'disabled' : ''}>Sau</button></div>
