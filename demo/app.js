@@ -820,6 +820,11 @@
   /* ---------- screen: results ---------- */
   function renderResults() {
     const root = $('#screen-results'), B = ST.bench, f = ST.res;
+    const view = f.view || 'impr', isEn = window.I18N && I18N.lang() === 'en';
+    const vtabs = `<div class="xtabs">${[{ id: 'impr', label: isEn ? 'Our Improvement vs CoAD' : 'Our Improvement vs CoAD gốc', slides: 'demo' }, ...(window.EXP ? EXP.views() : [])]
+      .map(v => `<button class="xt ${v.id === view ? 'on' : ''}" data-v="${v.id}">${v.label}<small>${v.slides === 'demo' ? '' : 'slide ' + v.slides}</small></button>`).join('')}</div>`;
+    const bindTabs = () => root.querySelectorAll('.xt').forEach(b => b.onclick = () => { f.view = b.dataset.v; renderResults(); });
+    if (view !== 'impr') { root.innerHTML = vtabs + EXP.html(view); bindTabs(); return; }
     const fams = [...new Set(B.rows.map(r => r.family))].sort();
     const k = f.metric, tol = 0.005;
     const all = B.rows.filter(r => (f.family === 'all' || r.family === f.family) && (f.split === 'all' || r.split === f.split));
@@ -847,7 +852,7 @@
         <td class="r" style="color:${o.d > tol ? 'var(--ok)' : o.d < -tol ? 'var(--bad)' : 'inherit'};font-weight:600">${o.n ? (o.d >= 0 ? '+' : '') + pts(o.d) : '—'}</td>
         <td class="r">${o.n ? `<span style="color:var(--ok)">${o.up} tốt hơn</span> · <span style="color:var(--bad)">${o.down} kém hơn</span> · ${o.n - o.up - o.down} như nhau` : '—'}</td><td class="r">${isNaN(o.km) ? '—' : pts(o.km)}</td></tr>`).join('')}
       </tbody></table><div class="note" style="margin-top:6px">KMeansAD: một lần chạy (không phụ thuộc seed), cả 4 metric lấy từ lần chạy lại Table 1.</div></div></div>`;
-    root.innerHTML = `
+    root.innerHTML = vtabs + `
       <div class="panel"><div class="ph"><h2>Our Improvement so với CoAD gốc</h2>${info(B.aggregation)}</div>
         <div class="pb"><div class="filters">
           <div><label>Family</label><select id="fFam"><option value="all">Tất cả</option>${fams.map(x => `<option ${f.family === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
@@ -874,6 +879,7 @@
         ${rows.map(r => `<tr data-g="${r.group}" ${r.demo ? '' : 'style="cursor:default"'}><td>${r.group}</td><td>${r.family}</td><td>${r.split === 'design' ? 'thiết kế' : 'xác nhận'}</td><td class="r">${r.seeds.join(',')}</td>
           <td class="r">${pts(r[k + '_coad'])}${r[k + '_coad_sd'] !== null ? ' ± ' + pts(r[k + '_coad_sd']) : ''}</td><td class="r">${pts(r[k + '_cal'])}${r[k + '_cal_sd'] !== null ? ' ± ' + pts(r[k + '_cal_sd']) : ''}</td>
           <td class="r">${r.delta >= 0 ? '+' : ''}${pts(r.delta)}</td><td class="r">${pts(r.VUS_PR_kmeans)}</td><td>${r.demo ? 'có' : '—'}</td></tr>`).join('')}</tbody></table></div></details>`;
+    bindTabs();
     $('#fFam').onchange = e => { f.family = e.target.value; renderResults(); };
     $('#fSplit').onchange = e => { f.split = e.target.value; renderResults(); };
     $('#fMetric').onchange = e => { f.metric = e.target.value; renderResults(); };

@@ -786,5 +786,6 @@
 "· dài # điểm": "· # points long",
 "· phủ #% đoạn": "· covers #% of the event",
 "dài # điểm": "# points long",
-"phủ #% đoạn": "covers #% of the event"
+"phủ #% đoạn": "covers #% of the event",
+"Như nhau khi chênh lệch không quá # điểm": "Same when the difference is at most # points"
 }
