@@ -654,11 +654,12 @@
   /* Inspector as a vertical flow: one small chart per step of CoAD, all on the same time axis of the chosen window.
      Patch values are per window (not the aggregated timestamp score). Click a column to inspect that patch. */
   const FLOW_STEPS = [
-    { id: 'in', n: '①', t: 'Dữ liệu vào', s: 'Một cửa sổ (window) của chuỗi; mô hình xét từng patch 8 điểm.' },
-    { id: 'A', n: '②', t: 'Phân loại: patch nào trông lạ?', s: 'Cột cao = mô hình nghi patch đó bất thường (A = max của nhánh thời gian và nhánh tần số).', key: 'patch_p_mask', color: '#2563EB' },
-    { id: 'rec', n: '③', t: 'Che mềm rồi vẽ lại', s: 'Patch bị nghi được "che" nhiều hơn khi vẽ lại; chỗ bản vẽ lại (nét đứt) lệch dữ liệu thật được tô đỏ.' },
-    { id: 'R', n: '④', t: 'Kiểm tra phần dư (Aʳ)', s: 'So dữ liệu với bản vẽ lại: phần dư lớn → Aʳ cao, xác nhận patch lạ.', key: 'patch_r_fused', color: '#0F766E' },
-    { id: 'C', n: '⑤', t: 'Kết luận cho từng patch: A_c = (A + Aʳ)/2', s: 'Mức nghi ngờ cuối của patch; đi tiếp vào score theo thời điểm (tab Dấu vết).', key: 'patch_p_comb', color: '#7C3AED' },
+    { id: 'in', n: '①', t: 'Dữ liệu vào', s: 'Một cửa sổ của chuỗi. Vạch mờ chia cửa sổ thành các patch 8 điểm; mô hình xét từng patch.', h: 110 },
+    { id: 'A', n: '②', t: 'Phân loại: patch nào trông lạ?', s: 'Hai classifier chấm mỗi patch: một nhìn hình dạng theo thời gian, một nhìn phổ tần số. A = giá trị lớn hơn của hai. Cao = đáng nghi.', h: 120 },
+    { id: 'rec', n: '③', t: 'Che mềm rồi dựng lại', s: 'Nền xám đậm = patch bị che nhiều (theo A). MAE dựng lại chuỗi (nét đứt); chỗ lệch với dữ liệu thật được tô đỏ = sai số tái tạo.', h: 120 },
+    { id: 'R', n: '④', t: 'Kiểm tra phần dư (Aʳ)', s: 'Đường đỏ = phần dư |dữ liệu − dựng lại| ở từng điểm. Residual classifier đọc phần dư này và chấm lại từng patch (cột).', h: 120 },
+    { id: 'C', n: '⑤', t: 'Kết luận cho từng patch: A_c = (A + Aʳ) / 2', s: 'Trung bình của bước ② và bước ④. Đây là mức nghi ngờ cuối của mỗi patch.', h: 120 },
+    { id: 'S', n: '⑥', t: 'Score theo thời điểm, rồi làm mượt', s: 'A_c được gán cho 8 điểm của patch, cộng sai số tái tạo của từng điểm → score trước làm mượt (chấm). Làm mượt lấy trung bình trên một chu kỳ → score cuối (liền). Vượt vạch đứt mới báo động.', h: 130 },
   ];
   function renderInspector(box) {
     // only one inspector may exist at a time: its charts are looked up by id
@@ -679,28 +680,43 @@
     box.innerHTML = `<div class="note">t = <b>${ST.inspT}</b> · window ${wins.map(i => `<button class="btn small" data-w="${i}" ${i === wi ? 'style="font-weight:700;border-color:#1D4ED8"' : ''}>W${i}</button>`).join(' ')}
       · điểm ${Math.max(0, s0)}–${s0 + T - 1} ${info('Một thời điểm nằm trong nhiều window chồng lấp; mỗi window được xử lý riêng. Giá trị ở đây là của patch trong window đang chọn, không phải score đã tổng hợp theo thời điểm.')}</div>
       <div class="flow2">${FLOW_STEPS.map((st, k) => `${k ? '<div class="fdown">↓</div>' : ''}<div class="fstep2"><div class="fh2"><span class="fn2">${st.n}</span><b>${st.t}</b></div>
-        <div class="fs2">${st.s}</div><div id="fl-${st.id}" style="height:${st.id === 'in' || st.id === 'rec' ? 110 : 80}px"></div></div>`).join('')}</div>
-      <div class="patchbox" id="patchBox" style="margin-top:10px">Click một cột ở bước ②, ④ hoặc ⑤ để xem chi tiết patch đó.</div>`;
+        <div class="fs2">${st.s}</div><div id="fl-${st.id}" style="height:${st.h}px"></div></div>`).join('')}</div>
+      <div class="patchbox" id="patchBox" style="margin-top:10px">Bấm một cột ở bước ②, ④ hoặc ⑤ để xem chi tiết patch đó.</div>`;
     box.querySelectorAll('button[data-w]').forEach(b => b.onclick = () => { ST.inspWin = +b.dataset.w; ST.inspPatch = null; renderInspector(box); });
-    const a = Math.max(0, s0), b = s0 + T, idx = [], inp = [], rec = [];
-    for (let i = a; i < b; i++) { idx.push(i); inp.push(d.arr.input[i]); rec.push(d.arr.reconstruction[i]); }
+    const a = Math.max(0, s0), b = s0 + T, idx = [], inp = [], rec = [], res = [], pre = [], fin = [];
+    for (let i = a; i < b; i++) { idx.push(i); inp.push(d.arr.input[i]); rec.push(d.arr.reconstruction[i]); res.push(Math.abs(d.arr.input[i] - d.arr.reconstruction[i])); pre.push(d.arr.coad_pre[i]); fin.push(d.arr.coad_final[i]); }
     const centers = Array.from({ length: N }, (_, j) => s0 + j * P + (P - 1) / 2), cfg = { displaylogo: false, responsive: true, displayModeBar: false };
-    const lay = extra => Object.assign({}, BASE, { margin: { l: 34, r: 8, t: 4, b: 18 }, showlegend: false, hovermode: 'closest',
-      xaxis: { range: [s0 - 0.5, s0 + T - 0.5], showgrid: false }, shapes: flowShapes() }, extra);
+    const pv = k => Array.from(d.arr[k].subarray(wi * N, wi * N + N));
+    const A = pv('patch_p_mask'), At = pv('patch_p_time'), Af = pv('patch_p_freq'), R = pv('patch_r_fused'), C = pv('patch_p_comb');
+    const grid = Array.from({ length: N + 1 }, (_, j) => ({ name: 'st', type: 'line', x0: s0 + j * P - 0.5, x1: s0 + j * P - 0.5, yref: 'paper', y0: 0, y1: 1, line: { color: '#CBD5E1', width: 1 } }));
+    const lay = (extra, legend, more) => Object.assign({}, BASE, { margin: { l: 34, r: 8, t: legend ? 18 : 4, b: 18 }, showlegend: !!legend, hovermode: 'closest',
+      legend: { orientation: 'h', x: 0, y: 1.22, font: { size: 10 } }, xaxis: { range: [s0 - 0.5, s0 + T - 0.5], showgrid: false }, shapes: flowShapes().concat(grid, more || []) }, extra);
+    const bars = (y, name, color, off) => ({ type: 'bar', name, x: centers.map(c => c + off), y, width: P * 0.28, marker: { color },
+      text: y.map(v => v.toFixed(2)), textposition: 'outside', textfont: { size: 9 }, cliponaxis: false, customdata: y.map((_, j) => j),
+      hovertemplate: name + ' · patch %{customdata} · %{y:.3f}<extra></extra>' });
+    const yb = { yaxis: { range: [0, 1.15], tickvals: [0, 0.5, 1], fixedrange: true }, barmode: 'overlay' };
     Plotly.newPlot($('#fl-in'), [{ x: idx, y: inp, mode: 'lines', line: { color: '#334155', width: 1.2 }, hovertemplate: 't=%{x}<br>%{y:.3f}<extra></extra>' }], lay({}), cfg);
-    // reconstruction step: fill between input and reconstruction where they differ
+    Plotly.newPlot($('#fl-A'), [bars(At, 'Classifier miền thời gian', '#60A5FA', -P * 0.15), bars(Af, 'Classifier miền tần số', '#F59E0B', P * 0.15)], lay(yb, true), cfg);
+    // reconstruction: patch background darker when the patch is masked more (A); red fill between input and reconstruction
+    const maskBg = A.map((m, j) => ({ name: 'st', type: 'rect', x0: s0 + j * P - 0.5, x1: s0 + j * P + P - 0.5, yref: 'paper', y0: 0, y1: 1,
+      fillcolor: `rgba(100,116,139,${(0.08 + 0.4 * m).toFixed(2)})`, line: { width: 0 }, layer: 'below' }));
     Plotly.newPlot($('#fl-rec'), [
-      { x: idx, y: rec, mode: 'lines', line: { color: '#0F766E', width: 0 }, hoverinfo: 'skip' },
-      { x: idx, y: inp, mode: 'lines', line: { color: '#334155', width: 1.2 }, fill: 'tonexty', fillcolor: 'rgba(225,29,72,.22)', hovertemplate: 'dữ liệu %{y:.3f}<extra></extra>' },
-      { x: idx, y: rec, mode: 'lines', line: { color: '#0F766E', width: 1.4, dash: 'dash' }, hovertemplate: 'vẽ lại %{y:.3f}<extra></extra>' }], lay({}), cfg);
-    FLOW_STEPS.filter(st => st.key).forEach(st => {
-      const vals = Array.from(d.arr[st.key].subarray(wi * N, wi * N + N));
-      const div = $('#fl-' + st.id);
-      Plotly.newPlot(div, [{ type: 'bar', x: centers, y: vals, width: P * 0.9, marker: { color: vals.map(v => (v >= 0.5 ? st.color : '#CBD5E1')) },
-        customdata: vals.map((_, j) => j), hovertemplate: 'patch %{customdata} · %{y:.2f}<extra></extra>' }],
-        lay({ yaxis: { range: [0, 1], tickvals: [0, 0.5, 1], fixedrange: true }, bargap: 0 }), cfg);
-      div.on('plotly_click', ev => { ST.inspPatch = ev.points[0].customdata; patchDetail(); });
-    });
+      { x: idx, y: rec, mode: 'lines', line: { color: '#0F766E', width: 0 }, hoverinfo: 'skip', showlegend: false },
+      { x: idx, y: inp, name: 'Dữ liệu', mode: 'lines', line: { color: '#334155', width: 1.2 }, fill: 'tonexty', fillcolor: 'rgba(225,29,72,.25)', hovertemplate: 'dữ liệu %{y:.3f}<extra></extra>' },
+      { x: idx, y: rec, name: 'Dựng lại (MAE)', mode: 'lines', line: { color: '#0F766E', width: 1.4, dash: 'dash' }, hovertemplate: 'dựng lại %{y:.3f}<extra></extra>' }],
+      lay({}, true, maskBg), cfg);
+    Plotly.newPlot($('#fl-R'), [
+      { x: idx, y: res, name: 'Phần dư |dữ liệu − dựng lại|', mode: 'lines', yaxis: 'y2', line: { color: '#E11D48', width: 1.4 }, hovertemplate: 'phần dư %{y:.3f}<extra></extra>' },
+      bars(R, 'Aʳ (residual classifier)', '#0F766E', 0)],
+      lay(Object.assign({}, yb, { yaxis2: { overlaying: 'y', side: 'right', showgrid: false, rangemode: 'tozero', tickfont: { size: 9, color: '#E11D48' } }, margin: { l: 34, r: 34, t: 18, b: 18 } }), true), cfg);
+    Plotly.newPlot($('#fl-C'), [bars(A, 'A (bước ②)', '#2563EB', -P * 0.3), bars(R, 'Aʳ (bước ④)', '#0F766E', 0), bars(C, 'A_c = (A + Aʳ) / 2', '#7C3AED', P * 0.3)], lay(yb, true), cfg);
+    const th = ST.results.coad ? ST.results.coad.th.value : null;
+    const thLine = th === null ? [] : [{ name: 'st', type: 'line', xref: 'paper', x0: 0, x1: 1, y0: th, y1: th, line: { color: '#0F172A', dash: 'dash', width: 1 } }];
+    Plotly.newPlot($('#fl-S'), [
+      { x: idx, y: pre, name: 'Score trước làm mượt', mode: 'lines', line: { color: '#2563EB', width: 1.2, dash: 'dot' }, hovertemplate: 'trước làm mượt %{y:.4f}<extra></extra>' },
+      { x: idx, y: fin, name: 'Score cuối (sau làm mượt)', mode: 'lines', line: { color: '#2563EB', width: 2 }, hovertemplate: 'score cuối %{y:.4f}<extra></extra>' }],
+      lay({ yaxis: { rangemode: 'tozero' } }, true, thLine), cfg);
+    ['A', 'R', 'C'].forEach(id => $('#fl-' + id).on('plotly_click', ev => { const k = ev.points[0].customdata; if (k !== undefined) { ST.inspPatch = k; patchDetail(); } }));
     if (ST.inspPatch !== null) patchDetail();
   }
   // the clicked time point and the selected patch, drawn on every flow chart
@@ -724,7 +740,7 @@
         <span class="last">⑤ A_c <b>${fmt(m2, 2)}</b><small>(A + Aʳ) / 2</small></span></div>
       ${mix(m1, 'Lượt vẽ lại 1 (theo A)')}${mix(m2, 'Lượt vẽ lại 2 (theo A_c)')}
       <div class="note" style="margin-top:6px">Đây là tỷ trọng trộn embedding, không phải tỷ lệ thời điểm bị xóa. Phần input giữ lại không mặc định là bình thường.</div>`;
-    ['in', 'A', 'rec', 'R', 'C'].forEach(id => { const g = $('#fl-' + id); if (g && g.data) Plotly.relayout(g, { shapes: flowShapes() }); });
+    ['in', 'A', 'rec', 'R', 'C', 'S'].forEach(id => { const g = $('#fl-' + id); if (g && g.data) Plotly.relayout(g, { shapes: flowShapes().concat((g.layout.shapes || []).filter(x => x.name === 'st')) }); });
   }
 
   /* ---------- screen: errors ---------- */
