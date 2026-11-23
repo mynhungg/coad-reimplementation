@@ -21,21 +21,21 @@
   "commit": "3286813619091eeebec04b3c9d73c837bdc4469e",
   "result_mode": "precomputed",
   "inference_device": "cpu",
-  "inference_seconds": 0.95,
+  "inference_seconds": 0.36,
   "inference_scope": "test + training part, all signals and both methods (no patch diagnostics)",
-  "max_abs_diff_to_saved_benchmark_score": 6.076862871795541e-07,
+  "max_abs_diff_to_saved_benchmark_score": 6.046850901109124e-07,
   "final_loss": {
    "loss": 0.34942,
    "classify": 0.32125,
    "recon": 0.00282
   },
   "code": "demo/coad_core.py (CoAD_reimplementation.ipynb, code mode)",
-  "created": "2026-11-16 19:59"
+  "created": "2026-11-23 16:24"
  },
  "calibration": {
   "source": "training part (label-free)",
-  "sd_reconstruction": 0.028696920173921777,
-  "sd_classification": 0.00968506789549218
+  "sd_reconstruction": 0.028696919380541197,
+  "sd_classification": 0.009685068130159204
  },
  "fields": {
   "input": {
@@ -194,60 +194,60 @@
  },
  "stage_thresholds": {
   "oe": {
-   "train_mu3sd": 0.4031994302426033,
-   "train_max": 0.29581981897354126
+   "train_mu3sd": 0.4031994334128527,
+   "train_max": 0.29581978917121887
   },
   "residual": {
-   "train_mu3sd": 0.14100452330796373,
-   "train_max": 0.4358888566493988
+   "train_mu3sd": 0.14100455829686337,
+   "train_max": 0.43588900566101074
   },
   "combined": {
-   "train_mu3sd": 0.2369393666955832,
-   "train_max": 0.31784895062446594
+   "train_mu3sd": 0.23693936977501784,
+   "train_max": 0.3178490102291107
   },
   "rec_error": {
-   "train_mu3sd": 0.5667640056008303,
+   "train_mu3sd": 0.5667640128794592,
    "train_max": 0.5105482341315186
   },
   "c_raw": {
-   "train_mu3sd": 0.08787070004338379,
-   "train_max": 0.059552374227096624
+   "train_mu3sd": 0.08787069693650049,
+   "train_max": 0.05955231563722095
   },
   "r_raw": {
-   "train_mu3sd": 0.2709905083674279,
-   "train_max": 0.22843231037059872
+   "train_mu3sd": 0.2709905112891913,
+   "train_max": 0.22843242438764075
   },
   "c_smooth": {
-   "train_mu3sd": 0.061229346072531145,
-   "train_max": 0.038124724262669336
+   "train_mu3sd": 0.06122934686471425,
+   "train_max": 0.03812471618965671
   },
   "r_smooth": {
-   "train_mu3sd": 0.18178945418199938,
-   "train_max": 0.1102978621218687
+   "train_mu3sd": 0.18178945357517703,
+   "train_max": 0.11029785563482941
   },
   "coad_pre": {
-   "train_mu3sd": 0.17079566775615784,
-   "train_max": 0.1423729139026227
+   "train_mu3sd": 0.1707956695976849,
+   "train_max": 0.14237295651736706
   },
   "coad_final": {
-   "train_mu3sd": 0.12143641674334887,
-   "train_max": 0.07262418320509535
+   "train_mu3sd": 0.12143641710853298,
+   "train_max": 0.07262418074101744
   },
   "cal_c": {
-   "train_mu3sd": 6.322035811543432,
-   "train_max": 3.936443675362783
+   "train_mu3sd": 6.322035740156197,
+   "train_max": 3.936442746431151
   },
   "cal_r": {
-   "train_mu3sd": 6.334807117984733,
-   "train_max": 3.8435435389370283
+   "train_mu3sd": 12.669614543953092,
+   "train_max": 7.687086838291093
   },
   "cal_pre": {
-   "train_mu3sd": 8.643392079642542,
-   "train_max": 6.887318086004509
+   "train_mu3sd": 8.782958957278861,
+   "train_max": 7.2449365363687415
   },
   "cal_final": {
-   "train_mu3sd": 6.323380970257437,
-   "train_max": 3.7394256945176063
+   "train_mu3sd": 6.326070090761851,
+   "train_max": 3.7653072034782995
   }
  },
  "methods": {
@@ -256,8 +256,8 @@
    "score": "coad_final",
    "pre": "coad_pre",
    "thresholds": {
-    "train_mu3sd": 0.12143641674334887,
-    "train_max": 0.07262418320509535
+    "train_mu3sd": 0.12143641710853298,
+    "train_max": 0.07262418074101744
    },
    "metrics": {
     "f1_score": 0.260934,
@@ -274,17 +274,17 @@
    "score": "cal_final",
    "pre": "cal_pre",
    "thresholds": {
-    "train_mu3sd": 6.323380970257437,
-    "train_max": 3.7394256945176063
+    "train_mu3sd": 6.326070090761851,
+    "train_max": 3.7653072034782995
    },
    "metrics": {
-    "f1_score": 0.254011,
-    "auc_prc": 0.103862,
-    "auc_roc": 0.663238,
-    "R_AUC_ROC": 0.6899,
-    "R_AUC_PR": 0.206603,
-    "VUS_ROC": 0.67688,
-    "VUS_PR": 0.198351
+    "f1_score": 0.252576,
+    "auc_prc": 0.115597,
+    "auc_roc": 0.695026,
+    "R_AUC_ROC": 0.712793,
+    "R_AUC_PR": 0.224502,
+    "VUS_ROC": 0.701903,
+    "VUS_PR": 0.215975
    }
   },
   "kmeans": {

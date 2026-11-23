@@ -72,7 +72,7 @@
 
   window.I18N = { lang: () => lang, setLang, missing: () => [...seen].sort(), tr: s => tr(s) };
   if (lang === 'en') {
-    fetch('i18n_en.json?v=21').then(r => r.json()).then(d => { dict = d; patchPlotly(); start(); }).catch(() => { /* no dictionary: stay Vietnamese */ });
+    fetch('i18n_en.json?v=23').then(r => r.json()).then(d => { dict = d; patchPlotly(); start(); }).catch(() => { /* no dictionary: stay Vietnamese */ });
   }
   document.addEventListener('DOMContentLoaded', () => {
     const b = document.getElementById('langBtn');

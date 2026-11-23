@@ -21,7 +21,7 @@
   "commit": "3286813619091eeebec04b3c9d73c837bdc4469e",
   "result_mode": "precomputed",
   "inference_device": "cpu",
-  "inference_seconds": 7.02,
+  "inference_seconds": 3.89,
   "inference_scope": "test + training part, all signals and both methods (no patch diagnostics)",
   "max_abs_diff_to_saved_benchmark_score": 5.495124090690306e-07,
   "final_loss": {
@@ -30,7 +30,7 @@
    "recon": 0.0023
   },
   "code": "demo/coad_core.py (CoAD_reimplementation.ipynb, code mode)",
-  "created": "2026-11-23 14:23"
+  "created": "2026-11-23 16:24"
  },
  "calibration": {
   "source": "training part (label-free)",
@@ -15047,16 +15047,16 @@
    "train_max": 7.732619462443023
   },
   "cal_r": {
-   "train_mu3sd": 5.822343397396651,
-   "train_max": 9.031361036339625
+   "train_mu3sd": 11.644686794793301,
+   "train_max": 18.06272207267925
   },
   "cal_pre": {
-   "train_mu3sd": 6.615221346776867,
-   "train_max": 12.103526443612498
+   "train_mu3sd": 7.287331631276778,
+   "train_max": 15.081435555202033
   },
   "cal_final": {
-   "train_mu3sd": 4.738869054151447,
-   "train_max": 6.669932364104474
+   "train_mu3sd": 4.945894358241682,
+   "train_max": 7.281928094524463
   }
  },
  "methods": {
@@ -15083,17 +15083,17 @@
    "score": "cal_final",
    "pre": "cal_pre",
    "thresholds": {
-    "train_mu3sd": 4.738869054151447,
-    "train_max": 6.669932364104474
+    "train_mu3sd": 4.945894358241682,
+    "train_max": 7.281928094524463
    },
    "metrics": {
-    "f1_score": 0.347404,
-    "auc_prc": 0.256019,
-    "auc_roc": 0.772796,
-    "R_AUC_ROC": 0.909324,
-    "R_AUC_PR": 0.415262,
-    "VUS_ROC": 0.888299,
-    "VUS_PR": 0.389267
+    "f1_score": 0.380515,
+    "auc_prc": 0.293359,
+    "auc_roc": 0.806541,
+    "R_AUC_ROC": 0.925719,
+    "R_AUC_PR": 0.448114,
+    "VUS_ROC": 0.906693,
+    "VUS_PR": 0.42387
    }
   },
   "kmeans": {

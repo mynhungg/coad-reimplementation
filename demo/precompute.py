@@ -69,11 +69,12 @@ def train_scores(model, series):
     test = dict(oe=t['oe'], residual=t['residual'], combined=t['combined'], reconstruction=t['reconstruction'],
                 rec_error=err_t, c_raw=c0, r_raw=r0, c_smooth=c, r_smooth=r,
                 coad_pre=(r0 + c0) / 2, coad_final=(r + c) / 2,
-                cal_c=c / s_c, cal_r=r / s_r, cal_pre=(r0 / s_r + c0 / s_c) / 2, cal_final=(r / s_r + c / s_c) / 2)
+                cal_c=c / s_c, cal_r=W_REC * r / s_r, cal_pre=(W_REC * r0 / s_r + c0 / s_c) / (W_REC + 1),
+                cal_final=(W_REC * r / s_r + c / s_c) / (W_REC + 1))
     train = dict(oe=tr['oe'], residual=tr['residual'], combined=tr['combined'], rec_error=err_tr, c_raw=c0_tr,
                  r_raw=r0_tr, c_smooth=c_tr, r_smooth=r_tr, coad_pre=(r0_tr + c0_tr) / 2, coad_final=(r_tr + c_tr) / 2,
-                 cal_c=c_tr / s_c, cal_r=r_tr / s_r, cal_pre=(r0_tr / s_r + c0_tr / s_c) / 2,
-                 cal_final=(r_tr / s_r + c_tr / s_c) / 2)
+                 cal_c=c_tr / s_c, cal_r=W_REC * r_tr / s_r, cal_pre=(W_REC * r0_tr / s_r + c0_tr / s_c) / (W_REC + 1),
+                 cal_final=(W_REC * r_tr / s_r + c_tr / s_c) / (W_REC + 1))
     return test, train, dict(s_r=float(s_r), s_c=float(s_c))
 
 
@@ -135,6 +136,11 @@ def kmeans_score(repo, group):
         subprocess.run([sys.executable, 'baseline_compare.py', '--model_name', 'Kmeans', '--dataset_name', 'TSB-AD',
                         '--group_name', str(group)], cwd=repo, check=True, capture_output=True)
     return np.load(path).astype(float)
+
+
+# "Our Improvement" = M17 'B1 err w2': each branch divided by its training SD (label-free), reconstruction counted
+# twice; w = 2 was locked on the 30 design series. +4.22 VUS-PR vs CoAD on the 34 confirmation series (p = 0.001).
+W_REC = 2
 
 
 def metrics(score, series):

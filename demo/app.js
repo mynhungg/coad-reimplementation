@@ -48,7 +48,7 @@
     ],
     calibrated: [
       ['cal_c', 'Nhánh phân loại / σ_c (train)', 'đơn vị σ của phần train'],
-      ['cal_r', 'Nhánh tái tạo / σ_r (train)', 'đơn vị σ của phần train'],
+      ['cal_r', 'Nhánh tái tạo × 2 / σ_r (train)', 'đơn vị σ, nhân 2'],
       ['cal_pre', 'Gộp Our Improvement trước làm mượt', 'đơn vị σ'],
       ['cal_final', 'Score cuối Our Improvement', 'đơn vị σ'],
     ],
@@ -319,7 +319,7 @@
     const ev = ST.results[m].ev, met = ST.data.meta.methods[m].metrics, th = ST.results[m].th;
     const dots = ev.events.map((e, k) => `<i class="${e.status} ${ST.selEvent && ST.selEvent.id === e.id ? 'sel' : ''}" data-k="${k}" title="${e.id}: ${e.a}–${e.b - 1} · ${STATUS_VI[e.status]} · coverage ${pct(e.coverage)}"></i>`).join('');
     const tip = `Ngưỡng ${fmt(th.value, 4)} (${POLICY_LABEL[th.policy]}). Gắn cờ ${ev.flagged.toLocaleString('vi')} điểm (${pct(ev.flaggedShare)}) · ${ev.intervals.length} đoạn · P ${pct(ev.point.precision)} · R ${pct(ev.point.recall)} · AUC-PR ${pts(met.auc_prc)}`;
-    return `<tr><td class="mname"><i style="background:${METHOD[m].color}"></i>${METHOD[m].label}</td>
+    return `<tr><td class="mname"><i style="background:${METHOD[m].color}"></i>${METHOD[m].label}${m === 'calibrated' ? ' ' + info('Our Improvement: mỗi nhánh được chia cho độ lệch chuẩn của nó trên phần train, rồi gộp với nhánh tái tạo tính hai lần: (2·tái tạo/σ_r + phân loại/σ_c) / 3. Không dùng nhãn; trọng số 2 chốt trên 30 series thiết kế. Chấm lại trên đúng model đã train.') : ''}</td>
       <td class="r num"><b>${ev.nHit}</b><span class="of">/${ev.events.length}</span></td><td class="r num">${ev.falseAlarms.length}</td>
       <td class="r num"><b>${pts(met.VUS_PR)}</b></td>
       <td>${ev.events.length ? `<div class="dots" data-m="${m}">${dots}</div>` : ''}</td>
@@ -578,7 +578,7 @@
   const STAGE_SHORT = {
     oe: 'Phân loại (A)', residual: 'Phân loại residual (Aʳ)', combined: 'Kết hợp A_c', rec_error: 'Lỗi tái tạo',
     c_raw: 'Nhánh phân loại', r_raw: 'Nhánh tái tạo', coad_pre: 'Gộp, trước làm mượt', c_smooth: 'Phân loại, sau làm mượt',
-    r_smooth: 'Tái tạo, sau làm mượt', coad_final: 'Score cuối', cal_c: 'Nhánh phân loại ÷ σ', cal_r: 'Nhánh tái tạo ÷ σ',
+    r_smooth: 'Tái tạo, sau làm mượt', coad_final: 'Score cuối', cal_c: 'Nhánh phân loại ÷ σ', cal_r: 'Nhánh tái tạo × 2 ÷ σ',
     cal_pre: 'Gộp, trước làm mượt', cal_final: 'Score cuối',
   };
   /* evidence bars on a log scale (1x = the stage's own reference threshold, at the black tick; 20x fills the bar) */
@@ -596,7 +596,7 @@
   /* where does the signal get lost? one chain per method, each step ✓ (above its reference) or ✗ */
   const CHAIN = {
     coad: [[['combined', 'Phân loại'], ['rec_error', 'Tái tạo']], [['c_raw', 'Nhánh PL'], ['r_raw', 'Nhánh TT']], [['coad_pre', 'Gộp']], [['coad_final', 'Làm mượt → score']]],
-    calibrated: [[['combined', 'Phân loại'], ['rec_error', 'Tái tạo']], [['cal_c', 'Nhánh PL ÷σ'], ['cal_r', 'Nhánh TT ÷σ']], [['cal_pre', 'Gộp']], [['cal_final', 'Làm mượt → score']]],
+    calibrated: [[['combined', 'Phân loại'], ['rec_error', 'Tái tạo']], [['cal_c', 'Nhánh PL ÷σ'], ['cal_r', 'Nhánh TT ×2÷σ']], [['cal_pre', 'Gộp']], [['cal_final', 'Làm mượt → score']]],
   };
   function chainHTML(m, a, b) {
     const th = ST.results[m].th.value, pk = R.peakIn(score(m), Math.max(a, ST.data.meta.valid_from), b).value, ok = pk >= th;
@@ -818,6 +818,7 @@
   }
 
   /* ---------- screen: results ---------- */
+  const SPLIT_NAME = { all: '64 series paper', design: 'tập thiết kế', confirmation: 'tập xác nhận', external: 'ngoài paper' };
   function renderResults() {
     const root = $('#screen-results'), B = ST.bench, f = ST.res;
     const view = f.view || 'impr', isEn = window.I18N && I18N.lang() === 'en';
@@ -825,9 +826,11 @@
       .map(v => `<button class="xt ${v.id === view ? 'on' : ''}" data-v="${v.id}">${v.label}</button>`).join('')}</div>`;
     const bindTabs = () => root.querySelectorAll('.xt').forEach(b => b.onclick = () => { f.view = b.dataset.v; renderResults(); });
     if (view !== 'impr') { root.innerHTML = vtabs + EXP.html(view); bindTabs(); return; }
-    const fams = [...new Set(B.rows.map(r => r.family))].sort();
+    const inSet = r => f.split === 'all' ? r.split !== 'external' : r.split === f.split;
+    const fams = [...new Set(B.rows.filter(inSet).map(r => r.family))].sort();
+    if (f.family !== 'all' && !fams.includes(f.family)) f.family = 'all';
     const k = f.metric, tol = 0.005;
-    const all = B.rows.filter(r => (f.family === 'all' || r.family === f.family) && (f.split === 'all' || r.split === f.split));
+    const all = B.rows.filter(r => (f.family === 'all' || r.family === f.family) && inSet(r));
     // a value that was never computed is N/A, never 0 (spec 2): such series are left out of counts, means and bars
     const has = r => r[k + '_cal'] !== null && r[k + '_cal'] !== undefined && r[k + '_coad'] !== null && r[k + '_coad'] !== undefined;
     const missing = all.filter(r => !has(r));
@@ -846,7 +849,7 @@
                up: d.filter(x => x > tol).length, down: d.filter(x => x < -tol).length,
                km: mean(rr.filter(r => r[mk + '_kmeans'] !== null && r[mk + '_kmeans'] !== undefined).map(r => r[mk + '_kmeans'])) };
     });
-    const ovHTML = `<div class="panel"><div class="ph"><h2>Tổng quan · cả 4 metric</h2><span class="note">${f.split === 'confirmation' ? 'tập xác nhận' : f.split === 'design' ? 'tập thiết kế' : 'mọi tập'}${f.family !== 'all' ? ' · ' + f.family : ''} · trung bình các series · bấm một dòng để xem chi tiết metric đó</span></div>
+    const ovHTML = `<div class="panel"><div class="ph"><h2>Tổng quan · cả 4 metric</h2><span class="note">${SPLIT_NAME[f.split]}${f.family !== 'all' ? ' · ' + f.family : ''} · trung bình các series · bấm một dòng để xem chi tiết metric đó</span></div>
       <div class="pb"><table class="ovt"><thead><tr><th>Metric</th><th class="r">Series</th><th class="r">CoAD gốc</th><th class="r">Our Improvement</th><th class="r">Δ</th><th class="r">Số series: cải tiến tốt hơn / kém hơn / như nhau</th><th class="r">KMeansAD</th></tr></thead><tbody>
       ${ov.map(o => `<tr data-mk="${o.mk}" class="${o.mk === k ? 'sel' : ''}"><td><b>${o.ml}</b></td><td class="r">${o.n || '—'}</td><td class="r">${o.n ? pts(o.coad) : 'N/A'}</td><td class="r">${o.n ? pts(o.cal) : 'N/A'}</td>
         <td class="r" style="color:${o.d > tol ? 'var(--ok)' : o.d < -tol ? 'var(--bad)' : 'inherit'};font-weight:600">${o.n ? (o.d >= 0 ? '+' : '') + pts(o.d) : '—'}</td>
@@ -856,14 +859,14 @@
       <div class="panel"><div class="ph"><h2>Our Improvement so với CoAD gốc</h2>${info(B.aggregation)}</div>
         <div class="pb"><div class="filters">
           <div><label>Family</label><select id="fFam"><option value="all">Tất cả</option>${fams.map(x => `<option ${f.family === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
-          <div><label>Tập</label><select id="fSplit"><option value="all">Tất cả</option><option value="design" ${f.split === 'design' ? 'selected' : ''}>Thiết kế (30)</option><option value="confirmation" ${f.split === 'confirmation' ? 'selected' : ''}>Xác nhận (34)</option></select></div>
+          <div><label>Tập</label><select id="fSplit"><option value="all">64 series paper</option><option value="design" ${f.split === 'design' ? 'selected' : ''}>Thiết kế (30)</option><option value="confirmation" ${f.split === 'confirmation' ? 'selected' : ''}>Xác nhận (34)</option><option value="external" ${f.split === 'external' ? 'selected' : ''}>Ngoài paper (60)</option></select></div>
           <div><label>Metric</label><select id="fMetric">${Object.entries(mlabel).map(([a, b]) => `<option value="${a}" ${f.metric === a ? 'selected' : ''}>${b}</option>`).join('')}</select></div>
           <div><label>Sắp xếp</label><select id="fSort"><option value="delta">Theo delta</option><option value="family" ${f.sort === 'family' ? 'selected' : ''}>Theo family</option></select></div></div>
           ${missing.length ? `<div class="warnbox" style="margin-top:10px">${missing.length} series N/A (không tính) ${info(`Không có ${mlabel[k]} của Our Improvement: ` + (missing.every(r => r.split === 'design') ? 'tập thiết kế chỉ được chấm nhanh bằng AUC-PR riêng của M11 lúc chọn phương án, không chạy evaluator đầy đủ.' : 'thiếu kết quả.') + ' Chọn Tập = Xác nhận để xem phần kiểm tra độc lập.')}</div>` : ''}
-          <div class="note" style="margin-top:8px">Trung bình 3 seed. Trên 60 series của 12 family khác, Our Improvement không hơn CoAD ổn định (báo cáo mục 9). ${info(B.source.coad + '; ' + B.source.calibrated + '. ' + B.source.split + '.')}</div></div></div>
+          <div class="note" style="margin-top:8px">Trung bình 3 seed. Chọn Tập = Ngoài paper (60) để xem 60 series của 12 family khác: ở đó Our Improvement tăng ít hơn và chưa có ý nghĩa (p = 0.17). ${info(B.source.coad + '; ' + B.source.calibrated + '. ' + B.source.split + '.')}</div></div></div>
       ${ovHTML}
       <div class="kpis">
-        <div class="kpi"><div class="v">${rows.length}</div><div class="l">series có ${mlabel[k]} · ${f.split === 'confirmation' ? 'tập xác nhận' : f.split === 'design' ? 'tập thiết kế' : 'mọi tập'}</div></div>
+        <div class="kpi"><div class="v">${rows.length}</div><div class="l">series có ${mlabel[k]} · ${SPLIT_NAME[f.split]}</div></div>
         <div class="kpi accent" style="--c:${METHOD.coad.color}"><div class="v">${pts(mC)}</div><div class="l">CoAD gốc (trung bình)</div></div>
         <div class="kpi accent" style="--c:${METHOD.calibrated.color}"><div class="v">${pts(mK)}</div><div class="l">Our Improvement (trung bình)</div></div>
         <div class="kpi ${mD > tol ? 'good' : mD < -tol ? 'bad' : ''}"><div class="v">${mD >= 0 ? '+' : ''}${pts(mD)}</div><div class="l">Δ trung bình (điểm)</div></div>
@@ -876,7 +879,7 @@
         ${famRows.map(x => `<tr><td>${x.fm}</td><td class="r">${x.n}</td><td class="r">${pts(x.coad)}</td><td class="r">${pts(x.cal)}</td><td class="r">${(x.cal - x.coad >= 0 ? '+' : '')}${pts(x.cal - x.coad)}</td></tr>`).join('')}</tbody></table></div></div>
       <details class="panel" style="padding:0"><summary class="ph" style="cursor:pointer"><h2>Bảng chi tiết (${rows.length} series) ▾</h2><span class="sub">click dòng có dữ liệu demo để mở phân tích chuỗi</span></summary><div class="pb tablewrap" style="max-height:480px"><table><thead><tr>
         <th>Series</th><th>Family</th><th>Tập</th><th class="r">Seed</th><th class="r">CoAD (± SD)</th><th class="r">Our Improvement (± SD)</th><th class="r">Δ</th><th class="r">KMeansAD VUS-PR</th><th>Demo</th></tr></thead><tbody>
-        ${rows.map(r => `<tr data-g="${r.group}" ${r.demo ? '' : 'style="cursor:default"'}><td>${r.group}</td><td>${r.family}</td><td>${r.split === 'design' ? 'thiết kế' : 'xác nhận'}</td><td class="r">${r.seeds.join(',')}</td>
+        ${rows.map(r => `<tr data-g="${r.group}" ${r.demo ? '' : 'style="cursor:default"'}><td>${r.group}</td><td>${r.family}</td><td>${{ design: 'thiết kế', confirmation: 'xác nhận', external: 'ngoài paper' }[r.split]}</td><td class="r">${r.seeds.join(',')}</td>
           <td class="r">${pts(r[k + '_coad'])}${r[k + '_coad_sd'] !== null ? ' ± ' + pts(r[k + '_coad_sd']) : ''}</td><td class="r">${pts(r[k + '_cal'])}${r[k + '_cal_sd'] !== null ? ' ± ' + pts(r[k + '_cal_sd']) : ''}</td>
           <td class="r">${r.delta >= 0 ? '+' : ''}${pts(r.delta)}</td><td class="r">${pts(r.VUS_PR_kmeans)}</td><td>${r.demo ? 'có' : '—'}</td></tr>`).join('')}</tbody></table></div></details>`;
     bindTabs();
@@ -1383,7 +1386,7 @@
       <p><b>Đây là demo nghiên cứu với kết quả tính sẵn.</b> Không có training/inference trên web, không có model tổng quát cho CSV mới (upload chỉ kiểm tra và xem trước).</p>
       <h3>Mô hình và dữ liệu</h3><ul>
         <li>CoAD được cài đặt lại (code mode, khớp code tác giả, T4 &lt; 1e-5). Mỗi series demo dùng đúng checkpoint GPU của benchmark (runs/reimpl, seed 46, 300 epoch); score tính lại khớp score đã lưu của benchmark (sai khác tối đa ghi trong Cấu hình lần chạy). Mỗi checkpoint được train riêng cho một series.</li>
-        <li><b>Our Improvement</b> (M11, B1): mỗi nhánh đã xử lý được chia cho độ lệch chuẩn của nó trên phần train trước khi gộp. Không dùng nhãn. Là phương án thử nghiệm: tăng trên tập xác nhận nhưng không tổng quát trên 12 family ngoài.</li>
+        <li><b>Our Improvement</b> (M17, w = 2): mỗi nhánh đã xử lý được chia cho độ lệch chuẩn của nó trên phần train, nhánh tái tạo tính hai lần khi gộp. Không dùng nhãn; trọng số chốt trên tập thiết kế. Tăng 4.22 VUS-PR trên tập xác nhận (p = 0.001), nhưng chỉ 2.25 trên 60 series ngoài paper (p = 0.17).</li>
         <li><b>KMeansAD</b>: baseline_compare.py của tác giả; score tính trên chính chuỗi test, nên ngưỡng mặc định là μ+3σ của chính score đó (không có phần train).</li>
         <li>Dữ liệu: TSB-AD-U; phần train là đoạn đầu của chuỗi (nền xám), toàn chuỗi được chấm điểm như loader của tác giả.</li></ul>
       <h3>Ngưỡng</h3><ul><li>Train μ + 3σ và Max trên phần train: tính trên score của phần train (không dùng nhãn), riêng cho từng phương pháp theo thang của nó.</li>

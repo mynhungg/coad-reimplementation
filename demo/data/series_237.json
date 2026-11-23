@@ -21,21 +21,21 @@
   "commit": "3286813619091eeebec04b3c9d73c837bdc4469e",
   "result_mode": "precomputed",
   "inference_device": "cpu",
-  "inference_seconds": 8.7,
+  "inference_seconds": 6.42,
   "inference_scope": "test + training part, all signals and both methods (no patch diagnostics)",
-  "max_abs_diff_to_saved_benchmark_score": 4.0365363852545855e-06,
+  "max_abs_diff_to_saved_benchmark_score": 4.2029152824071825e-06,
   "final_loss": {
    "loss": 0.1263,
    "classify": 0.09589,
    "recon": 0.00304
   },
   "code": "demo/coad_core.py (CoAD_reimplementation.ipynb, code mode)",
-  "created": "2026-11-16 20:03"
+  "created": "2026-11-23 16:20"
  },
  "calibration": {
   "source": "training part (label-free)",
-  "sd_reconstruction": 0.002072880106642706,
-  "sd_classification": 0.04040291584867195
+  "sd_reconstruction": 0.0020728804104280453,
+  "sd_classification": 0.040402931708749985
  },
  "fields": {
   "input": {
@@ -1221,60 +1221,60 @@
  },
  "stage_thresholds": {
   "oe": {
-   "train_mu3sd": 0.23203605584804,
-   "train_max": 0.8631077408790588
+   "train_mu3sd": 0.23203609047556398,
+   "train_max": 0.8631078004837036
   },
   "residual": {
-   "train_mu3sd": 0.2458810795010795,
-   "train_max": 0.6811476945877075
+   "train_mu3sd": 0.24588116094882373,
+   "train_max": 0.6811483502388
   },
   "combined": {
-   "train_mu3sd": 0.23733517057156533,
-   "train_max": 0.7721277475357056
+   "train_mu3sd": 0.23733522619129097,
+   "train_max": 0.7721281051635742
   },
   "rec_error": {
-   "train_mu3sd": 0.06498079008476869,
-   "train_max": 0.21280542016029358
+   "train_mu3sd": 0.06498079033264946,
+   "train_max": 0.21280540525913239
   },
   "c_raw": {
-   "train_mu3sd": 0.20592403921210023,
-   "train_max": 0.48226820478922877
+   "train_mu3sd": 0.20592408594811273,
+   "train_max": 0.48226811576180995
   },
   "r_raw": {
-   "train_mu3sd": 0.051842195557849906,
-   "train_max": 0.20017600954886924
+   "train_mu3sd": 0.05184219575962404,
+   "train_max": 0.20017599468768196
   },
   "c_smooth": {
-   "train_mu3sd": 0.1544738192395808,
-   "train_max": 0.28896366045107524
+   "train_mu3sd": 0.15447387190000675,
+   "train_max": 0.2889637211182063
   },
   "r_smooth": {
-   "train_mu3sd": 0.016443033139295377,
-   "train_max": 0.023496783848747056
+   "train_mu3sd": 0.016443034046486962,
+   "train_max": 0.023496789977073454
   },
   "coad_pre": {
-   "train_mu3sd": 0.11141386657362173,
-   "train_max": 0.2629042348486461
+   "train_mu3sd": 0.11141389009665308,
+   "train_max": 0.2629042084575062
   },
   "coad_final": {
-   "train_mu3sd": 0.08399163320327425,
-   "train_max": 0.1562187199442533
+   "train_mu3sd": 0.08399165989808144,
+   "train_max": 0.15621875309568184
   },
   "cal_c": {
-   "train_mu3sd": 3.8233334400457233,
-   "train_max": 7.152049657341093
+   "train_mu3sd": 3.8233332425862705,
+   "train_max": 7.152048351373125
   },
   "cal_r": {
-   "train_mu3sd": 7.932457399056702,
-   "train_max": 11.335331828140845
+   "train_mu3sd": 15.864913348369683,
+   "train_max": 22.67066624670491
   },
   "cal_pre": {
-   "train_mu3sd": 13.231094507240915,
-   "train_max": 48.86299827291017
+   "train_mu3sd": 17.084109119846833,
+   "train_max": 64.76499292268407
   },
   "cal_final": {
-   "train_mu3sd": 5.484414838149075,
-   "train_max": 9.238141842145613
+   "train_mu3sd": 6.215871750962094,
+   "train_max": 9.93350617455613
   }
  },
  "methods": {
@@ -1283,8 +1283,8 @@
    "score": "coad_final",
    "pre": "coad_pre",
    "thresholds": {
-    "train_mu3sd": 0.08399163320327425,
-    "train_max": 0.1562187199442533
+    "train_mu3sd": 0.08399165989808144,
+    "train_max": 0.15621875309568184
    },
    "metrics": {
     "f1_score": 0.260474,
@@ -1301,17 +1301,17 @@
    "score": "cal_final",
    "pre": "cal_pre",
    "thresholds": {
-    "train_mu3sd": 5.484414838149075,
-    "train_max": 9.238141842145613
+    "train_mu3sd": 6.215871750962094,
+    "train_max": 9.93350617455613
    },
    "metrics": {
-    "f1_score": 0.742457,
-    "auc_prc": 0.564432,
-    "auc_roc": 0.936818,
-    "R_AUC_ROC": 0.908297,
-    "R_AUC_PR": 0.57288,
-    "VUS_ROC": 0.91151,
-    "VUS_PR": 0.574701
+    "f1_score": 0.79634,
+    "auc_prc": 0.643095,
+    "auc_roc": 0.94004,
+    "R_AUC_ROC": 0.914845,
+    "R_AUC_PR": 0.626115,
+    "VUS_ROC": 0.91848,
+    "VUS_PR": 0.630818
    }
   },
   "kmeans": {
@@ -1319,7 +1319,7 @@
    "score": "kmeans_final",
    "pre": null,
    "thresholds": {
-    "self_mu3sd": 0.6220983966866475,
+    "self_mu3sd": 0.6220983966866476,
     "self_max": null
    },
    "metrics": {
