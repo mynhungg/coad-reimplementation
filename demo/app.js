@@ -886,7 +886,7 @@
   /* ---------- screen: data ----------
      dataset cards on top (pick one to explore), family tiles, a length × anomaly-ratio scatter, a compact series list */
   const TAG_LABEL = { success: 'Our Improvement tốt hơn', failure: 'Kém hơn ở checkpoint demo', representative: 'Đại diện' };
-  const DEMO_TAG = { 237: 'success', 276: 'success', 234: 'representative', 269: 'failure', 295: 'failure' };
+  const DEMO_TAG = { 266: 'representative', 237: 'success', 276: 'success', 234: 'representative', 269: 'failure', 295: 'failure' };
   const FAM_COLORS = ['#B45309', '#DB2777', '#65A30D', '#0891B2', '#64748B', '#CA8A04', '#EA580C', '#BE185D', '#4D7C0F', '#0E7490', '#A16207', '#475569', '#9F1239', '#15803D', '#7C2D12', '#334155', '#C2410C'];
   async function renderData() {
     const root = $('#screen-data');
@@ -1477,7 +1477,7 @@
     const demo = ST.bench.rows.filter(r => r.demo).map(r => r.group);
     renderSidebar();
     let first = null;
-    const order = [237, ...demo.filter(g => g !== 237)];
+    const order = [266, ...demo.filter(g => g !== 266)];   // default: has detected, partial and missed events
     for (const g of order) { if (!demo.includes(g)) continue; try { await loadJSON(`data/series_${g}.json`); first = g; break; } catch (e) { ST.cache[g] = null; } }
     // chart legends are laid out with the font loaded at draw time: wait (briefly) for the web font first
     if (document.fonts && document.fonts.load) await Promise.race([document.fonts.load('12px "Be Vietnam Pro"'), new Promise(r => setTimeout(r, 1500))]).catch(() => {});
