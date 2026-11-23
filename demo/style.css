@@ -591,3 +591,7 @@ aside#sidebar .sbh { font-size: 13px; margin-bottom: 6px; }
 .xtab td { border-bottom: 1px solid var(--border); padding: 6px 8px; }
 .xtab .r { text-align: right; white-space: nowrap; }
 .xtab tr.hl td { background: #F1F5F9; font-weight: 600; }
+
+/* collapsed sidebar: one full-width column (the hidden aside left main in a 0px first column) */
+.workspace.collapsed { grid-template-columns: minmax(0, 1fr); }
+.workspace.collapsed > main, .workspace.noside > main { grid-column: 1 / -1; min-width: 0; }
