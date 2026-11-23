@@ -320,14 +320,14 @@
     const dots = ev.events.map((e, k) => `<i class="${e.status} ${ST.selEvent && ST.selEvent.id === e.id ? 'sel' : ''}" data-k="${k}" title="${e.id}: ${e.a}–${e.b - 1} · ${STATUS_VI[e.status]} · coverage ${pct(e.coverage)}"></i>`).join('');
     const tip = `Ngưỡng ${fmt(th.value, 4)} (${POLICY_LABEL[th.policy]}). Gắn cờ ${ev.flagged.toLocaleString('vi')} điểm (${pct(ev.flaggedShare)}) · ${ev.intervals.length} đoạn · P ${pct(ev.point.precision)} · R ${pct(ev.point.recall)} · AUC-PR ${pts(met.auc_prc)}`;
     return `<tr><td class="mname"><i style="background:${METHOD[m].color}"></i>${METHOD[m].label}${m === 'calibrated' ? ' ' + info('Our Improvement: mỗi nhánh được chia cho độ lệch chuẩn của nó trên phần train, rồi gộp với nhánh tái tạo tính hai lần: (2·tái tạo/σ_r + phân loại/σ_c) / 3. Không dùng nhãn; trọng số 2 chốt trên 30 series thiết kế. Chấm lại trên đúng model đã train.') : ''}</td>
-      <td class="r num"><b>${ev.nHit}</b><span class="of">/${ev.events.length}</span></td><td class="r num">${ev.falseAlarms.length}</td>
+
       <td class="r num"><b>${pts(met.VUS_PR)}</b></td>
       <td>${ev.events.length ? `<div class="dots" data-m="${m}">${dots}</div>` : ''}</td>
       <td class="r">${info(tip)}</td></tr>`;
   }
   function methodTable(ms) {
     if (!ms.length) return '<span class="note">Chọn ít nhất một phương pháp.</span>';
-    return `<div class="mcards panel"><table class="mtab"><thead><tr><th>Phương pháp</th><th class="r">Bắt được</th><th class="r">Báo nhầm</th><th class="r">VUS-PR</th>
+    return `<div class="mcards panel"><table class="mtab"><thead><tr><th>Phương pháp</th><th class="r">VUS-PR</th>
       <th>Từng đoạn bất thường <span class="lgd"><i class="hit"></i>bắt <i class="partial"></i>một phần <i class="missed"></i>sót</span></th><th></th></tr></thead>
       <tbody>${ms.map(methodCard).join('')}</tbody></table></div>`;
   }
