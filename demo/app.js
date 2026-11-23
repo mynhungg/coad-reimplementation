@@ -821,8 +821,8 @@
   function renderResults() {
     const root = $('#screen-results'), B = ST.bench, f = ST.res;
     const view = f.view || 'impr', isEn = window.I18N && I18N.lang() === 'en';
-    const vtabs = `<div class="xtabs">${[{ id: 'impr', label: isEn ? 'Our Improvement vs CoAD' : 'Our Improvement vs CoAD gốc', slides: 'demo' }, ...(window.EXP ? EXP.views() : [])]
-      .map(v => `<button class="xt ${v.id === view ? 'on' : ''}" data-v="${v.id}">${v.label}<small>${v.slides === 'demo' ? '' : 'slide ' + v.slides}</small></button>`).join('')}</div>`;
+    const vtabs = `<div class="xtabs">${[{ id: 'impr', label: isEn ? 'Our Improvement vs CoAD' : 'Our Improvement so với CoAD gốc', slides: 'demo' }, ...(window.EXP ? EXP.views() : [])]
+      .map(v => `<button class="xt ${v.id === view ? 'on' : ''}" data-v="${v.id}">${v.label}</button>`).join('')}</div>`;
     const bindTabs = () => root.querySelectorAll('.xt').forEach(b => b.onclick = () => { f.view = b.dataset.v; renderResults(); });
     if (view !== 'impr') { root.innerHTML = vtabs + EXP.html(view); bindTabs(); return; }
     const fams = [...new Set(B.rows.map(r => r.family))].sort();

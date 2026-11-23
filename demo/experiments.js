@@ -8,7 +8,7 @@
 
   // each card: id, slide, title [vi, en], claim [vi, en], tables: [{head:[[vi,en]...], rows:[[...]], hl: row index to bold}], note [vi, en], src
   const VIEWS = [
-    { id: 'repro', label: ['Tái lập Table 1', 'Reproducing Table 1'], slides: '22 · A1 · A3', cards: [
+    { id: 'repro', label: ['Chạy lại Table 1', 'Table 1 rerun'], slides: '22 · A1 · A3', cards: [
       { slide: '22', title: ['So với Table 1 trên TSB-AD (64 series)', 'Against Table 1 on TSB-AD (64 series)'],
         claim: ['Bản bổ sung chi tiết từ code khớp code tác giả; chính code tác giả lệch paper ở F1 và AUC-PR.', 'The build with code details matches the authors\' code; the authors\' code itself is off the paper on F1 and AUC-PR.'],
         tables: [{ head: [['Metric', 'Metric'], ['Paper (Table 1)', 'Paper (Table 1)'], ['Bản chỉ theo paper (3 seed)', 'Paper-only build (3 seeds)'], ['Bản bổ sung chi tiết từ code (3 seed)', 'Build with code details (3 seeds)'], ['Code tác giả (1 lần)', 'Authors\' code (1 run)'], ['Code − paper', 'Code − paper'], ['p (bản bổ sung vs code)', 'p (code-details build vs code)']],
@@ -40,7 +40,7 @@
                  ['Series2Graph', '31.44', '29.57', '23.12', '24.81'], ['KMeansAD', '41.01', '36.81', '33.97', '33.20'], ['KShapeAD', '35.86', '31.27', '40.10', '39.02']] }],
         note: ['Việc baseline deep khớp khi train 1 epoch là suy luận từ việc số trùng, chưa phải bằng chứng trực tiếp. CoAD vẫn đứng đầu, nhưng trên TSB-AD chỉ hơn KMeansAD 0.7 thay vì 3.0.', 'That deep baselines match at 1 epoch is an inference from the agreement, not direct evidence. CoAD stays first, but on TSB-AD leads KMeansAD by 0.7 instead of 3.0.'], src: '§6.5' }] },
 
-    { id: 'checks', label: ['Thí nghiệm kiểm chứng', 'Controlled experiments'], slides: '23 · A2 · A4', cards: [
+    { id: 'checks', label: ['Phân tích thêm', 'Further analysis'], slides: '23 · A2 · A4', cards: [
       { slide: '23 · A2', title: ['Nhóm chi tiết từ code (MGAB, 9 series × 3 seed)', 'Code detail groups (MGAB, 9 series × 3 seeds)'],
         claim: ['Bỏ nhóm training thì cả 9 series đều giảm; nhóm architecture cũng cần.', 'Without the training details all 9 series drop; the architecture details are needed too.'],
         tables: [{ head: [['Cấu hình', 'Configuration'], ['VUS-PR', 'VUS-PR'], ['Thay đổi', 'Change'], ['p', 'p']],
@@ -107,7 +107,7 @@
                  [L('Hai mục tiêu train kéo ngược nhau', 'Gradient conflict between objectives'), L('Cosine +0.19, dương ở 9/9 lần chạy: không xung đột', 'Cosine +0.19, positive in 9/9 runs: no conflict')]] }],
         note: ['Hai nhánh gần như không tương quan theo đoạn (ρ = −0.089), tức bổ sung cho nhau như thiết kế.', 'The two branches are nearly uncorrelated over events (ρ = −0.089): complementary, as designed.'], src: '§7.3' }] },
 
-    { id: 'base', label: ['So với baseline', 'Against baselines'], slides: '24 · 26', cards: [
+    { id: 'base', label: ['So sánh baseline', 'Baseline comparison'], slides: '24 · 26', cards: [
       { slide: '24', title: ['64 series của paper (VUS-PR, Holm trên 7 phép so)', 'The paper\'s 64 series (VUS-PR, Holm over 7 comparisons)'],
         claim: ['CoAD có trung bình cao nhất nhưng không hơn KMeansAD một cách có ý nghĩa; xếp hạng theo series chỉ đứng thứ 3.', 'CoAD has the highest mean but is not significantly better than KMeansAD; on per-series ranks it is only 3rd.'],
         tables: [{ head: [['Baseline', 'Baseline'], ['Hạng TB', 'Mean rank'], ['CoAD thắng / thua', 'CoAD wins / losses'], ['Chênh', 'Diff.'], ['KTC 95%', '95% CI'], ['Holm p', 'Holm p']],
@@ -121,7 +121,7 @@
         tables: [{ head: [['Phương pháp', 'Method'], ['VUS-PR', 'VUS-PR']], rows: [['CoAD', '52.36'], ['KMeansAD', '58.96'], ['KShapeAD', '23.28']], hl: 1 }],
         note: ['58/60 series vì KShapeAD lỗi trên 2 series quá ngắn. Bỏ 4 family paper đã loại (NAB, WSD, YAHOO, Stock): CoAD thua 2.28, p = 0.73. KMeansAD được fit trên chính series kiểm tra, có lợi cho nó.', '58/60 series because KShapeAD fails on 2 very short series. Without the 4 families the paper excluded (NAB, WSD, YAHOO, Stock): CoAD trails by 2.28, p = 0.73. KMeansAD is fit on the test series itself, which favours it.'], src: '§8.2' }] },
 
-    { id: 'fixes', label: ['Các cải tiến', 'Improvements'], slides: '24 · 25 · A6', cards: [
+    { id: 'fixes', label: ['Cải tiến', 'Improvements'], slides: '24 · 25 · A6', cards: [
       { slide: '25 · A6', title: ['Các hướng đã thử, không cần nhãn khi tính score', 'Directions tested, label-free scoring'],
         claim: ['Cải tiến khâu tính score đều tăng trên dữ liệu paper, nhưng trên 12 family mới không biến thể nào hơn CoAD có ý nghĩa.', 'The scoring changes all gain on the paper\'s data, but on the 12 new families none beats CoAD significantly.'],
         tables: [{ head: [['Hướng', 'Direction'], ['Tập xác nhận (34)', 'Confirmation (34)'], ['Dữ liệu mới (60)', 'New data (60)'], ['Kết luận', 'Verdict']],
@@ -144,7 +144,7 @@
   }
   function card(c) {
     const note = pick(c.note);
-    return `<div class="panel xcard"><div class="ph"><h2>${esc(pick(c.title))}</h2><span class="xslide">${L('Slide', 'Slide')} ${esc(c.slide)}</span></div>
+    return `<div class="panel xcard"><div class="ph"><h2>${esc(pick(c.title))}</h2></div>
       <div class="pb"><p class="xclaim">${esc(pick(c.claim))}</p>${c.tables.map(table).join('')}
       <div class="note">${note ? esc(note) + ' · ' : ''}${L('Nguồn: báo cáo', 'Source: report')} ${esc(c.src)}</div></div></div>`;
   }
