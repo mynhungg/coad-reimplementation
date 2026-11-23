@@ -317,7 +317,7 @@
   // one row of the results table: plain numbers in aligned columns, the event strip, the threshold as a footnote
   function methodCard(m) {
     const ev = ST.results[m].ev, met = ST.data.meta.methods[m].metrics, th = ST.results[m].th;
-    const dots = ev.events.map((e, k) => `<i class="${e.status} ${ST.selEvent && ST.selEvent.id === e.id ? 'sel' : ''}" data-k="${k}" title="${e.id}: ${e.a}–${e.b - 1} · ${STATUS_VI[e.status]} · coverage ${pct(e.coverage)}"></i>`).join('');
+    const dots = ev.events.map((e, k) => `<i class="${e.status} ${ST.selEvent && ST.selEvent.id === e.id ? 'sel' : ''}" data-k="${k}" ${e.status === 'partial' ? `style="--cv:${Math.max(0.12, e.coverage).toFixed(3)}"` : ''} title="${e.id}: ${e.a}–${e.b - 1} · ${STATUS_VI[e.status]} · coverage ${pct(e.coverage)}"></i>`).join('');
     const tip = `Ngưỡng ${fmt(th.value, 4)} (${POLICY_LABEL[th.policy]}). Gắn cờ ${ev.flagged.toLocaleString('vi')} điểm (${pct(ev.flaggedShare)}) · ${ev.intervals.length} đoạn · P ${pct(ev.point.precision)} · R ${pct(ev.point.recall)} · AUC-PR ${pts(met.auc_prc)}`;
     return `<tr><td class="mname"><i style="background:${METHOD[m].color}"></i>${METHOD[m].label}${m === 'calibrated' ? ' ' + info('Our Improvement: mỗi nhánh được chia cho độ lệch chuẩn của nó trên phần train, rồi gộp với nhánh tái tạo tính hai lần: (2·tái tạo/σ_r + phân loại/σ_c) / 3. Không dùng nhãn; trọng số 2 chốt trên 30 series thiết kế. Chấm lại trên đúng model đã train.') : ''}</td>
 
