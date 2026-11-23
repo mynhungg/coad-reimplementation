@@ -361,8 +361,6 @@
         <div class="chart" id="cOverview" style="height:64px"></div></div>
       <div class="panel"><div class="ph"><h2>Input · ground truth · prediction</h2></div>
         <div class="chart" id="cInput" style="height:280px"></div></div>
-      <div class="panel"><div class="ph"><h2>Score + ngưỡng</h2>${info('Mỗi phương pháp một trục, ngưỡng theo thang của chính nó; vùng gạch = warm-up (chưa có score hợp lệ).')}<span class="note" style="margin-left:auto">Vạch đứt = ngưỡng báo động: trung bình + 3σ của score trên phần train, không dùng nhãn</span></div>
-        <div class="chart" id="cScore" style="height:${Math.max(200, 150 * ms.length)}px"></div></div>
       <div class="panel"><div class="ph"><h2>Input vs reconstruction</h2>${info('Reconstruction của CoAD (lượt tái tạo cuối, code mode), cùng thang với input.')}</div>
         <div class="chart" id="cRecon" style="height:200px"></div></div>
       <div class="panel" id="inspPanel"><div class="ph"><h2>Inspector · CoAD xử lý một cửa sổ như thế nào</h2>${info('Click một điểm trên biểu đồ phía trên (hoặc một ô sự kiện ở thẻ phương pháp) để xem cửa sổ chứa điểm đó đi qua từng bước của CoAD.')}</div>
@@ -375,7 +373,7 @@
       selectEvent(e);
       ST.inspT = R.peakIn(ST.data.arr.combined, e.a, e.b).index; ST.inspWin = null; ST.inspPatch = null; renderSeriesTab();
     });
-    drawOverview(); drawInput($('#cInput'), ms); drawScores($('#cScore'), ms); drawRecon($('#cRecon'));
+    drawOverview(); drawInput($('#cInput'), ms); drawRecon($('#cRecon'));
     if (ST.inspT === null || ST.inspT === undefined || ST.inspT >= ST.data.n) {      // start on the first missed (else first) event
       const evs = ms.length ? ST.results[ms[0]].ev.events : [], e = evs.find(x => x.status === 'missed') || evs[0];
       ST.inspT = e ? R.peakIn(ST.data.arr.combined, e.a, e.b).index : Math.floor(ST.data.n / 2); ST.inspWin = null; ST.inspPatch = null;
@@ -1448,11 +1446,10 @@
   const TOUR = [
     { screen: 'series', sel: '#sidebar', t: '1. Chọn dữ liệu', p: 'Chọn một chuỗi mẫu và phương pháp ở đây. Mỗi chuỗi là dữ liệu đo liên tục theo thời gian, ví dụ điện tâm đồ hay số liệu một dịch vụ web.' },
     { screen: 'series', sel: '.context', t: '2. Bạn đang xem gì', p: 'Dòng này cho biết chuỗi là dữ liệu gì, có bao nhiêu đoạn bất thường thật, và câu hỏi cần trả lời.' },
-    { screen: 'series', sel: '.mcards', t: '3. Kết quả từng phương pháp', p: 'Số lớn là số đoạn bất thường bắt được trên tổng số. Mỗi ô vuông là một đoạn: xanh = bắt được, đỏ = bỏ sót. Bấm một ô để phóng to tới đoạn đó.' },
+    { screen: 'series', sel: '.mcards', t: '3. Kết quả từng phương pháp', p: 'VUS-PR là metric chính. Mỗi ô vuông là một đoạn bất thường: xanh = bắt trọn, vàng = bắt một phần (tô theo độ phủ), đỏ = bỏ sót. Bấm một ô để phóng to tới đoạn đó.' },
     { screen: 'series', sel: '#cInput', t: '4. Dữ liệu và chỗ mô hình báo động', p: 'Đường xám là dữ liệu. Nền cam là bất thường thật. Thanh màu bên dưới là lúc mô hình báo động; trùng nền cam là bắt đúng.' },
-    { screen: 'series', sel: '#cScore', t: '5. Điểm bất thường', p: 'Mô hình chấm điểm cho từng thời điểm. Điểm vượt vạch đứt (ngưỡng) thì báo động.' },
-    { screen: 'series', sel: '#inspPanel', t: '6. CoAD chạy thế nào', p: 'Inspector cho thấy một cửa sổ dữ liệu đi qua từng bước của CoAD: phân loại patch, che rồi vẽ lại, kiểm tra phần dư, kết luận. Click một điểm trên biểu đồ để đổi cửa sổ.' },
-    { screen: 'series', sel: 'header nav', t: '7. Các màn hình khác', p: 'Phân tích lỗi: so CoAD với bản cải tiến trên từng đoạn. Kết quả thực nghiệm: tổng hợp trên nhiều chuỗi. Dữ liệu: mô tả các bộ dữ liệu và phân tích file CSV của bạn.' },
+    { screen: 'series', sel: '#inspPanel', t: '5. CoAD chạy thế nào', p: 'Inspector cho thấy một cửa sổ dữ liệu đi qua từng bước của CoAD: phân loại patch, che rồi vẽ lại, kiểm tra phần dư, kết luận. Click một điểm trên biểu đồ để đổi cửa sổ.' },
+    { screen: 'series', sel: 'header nav', t: '6. Các màn hình khác', p: 'Phân tích lỗi: so CoAD với bản cải tiến trên từng đoạn. Kết quả thực nghiệm: tổng hợp trên nhiều chuỗi. Dữ liệu: mô tả các bộ dữ liệu và phân tích file CSV của bạn.' },
   ];
   let tourI = -1, hole = null, pop = null;
   function tourShow() {

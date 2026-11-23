@@ -814,5 +814,7 @@
 "series có AUC-PR · mọi tập": "series with AUC-PR · all sets",
 "series có F# · mọi tập": "series with F# · all sets",
 "series có R-AUC-PR · mọi tập": "series with R-AUC-PR · all sets",
-"# · có checkpoint trên Drive (runs/m#), chưa nạp vào demo": "# · checkpoints on Drive (runs/m#), not loaded in the demo"
+"# · có checkpoint trên Drive (runs/m#), chưa nạp vào demo": "# · checkpoints on Drive (runs/m#), not loaded in the demo",
+"VUS-PR là metric chính. Mỗi ô vuông là một đoạn bất thường: xanh = bắt trọn, vàng = bắt một phần (tô theo độ phủ), đỏ = bỏ sót. Bấm một ô để phóng to tới đoạn đó.": "VUS-PR is the main metric. Each square is one anomaly: green = fully detected, amber = partly detected (filled by coverage), red = missed. Click a square to zoom to that anomaly.",
+"#. CoAD chạy thế nào": "#. How CoAD works"
 }
