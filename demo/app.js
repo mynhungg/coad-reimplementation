@@ -892,7 +892,7 @@
     const root = $('#screen-data');
     if (!ST.datasets) {
       root.innerHTML = '<div class="panel"><div class="loading">Đang tải metadata dữ liệu…</div></div>';
-      try { ST.datasets = await loadJSON('data/datasets.json'); }
+      try { ST.datasets = await loadJSON('data/datasets.json'); const dm = new Set(ST.bench.rows.filter(r => r.demo).map(r => r.group)); ST.datasets.paper.forEach(r => r.demo = dm.has(r.group)); }
       catch (e) { root.innerHTML = `<div class="panel"><div class="empty">Không đọc được data/datasets.json (${esc(e.message)}). Chạy tools/build_datasets.js.</div></div>`; return; }
     }
     const D = ST.datasets, f = ST.dataFilter || (ST.dataFilter = { set: 'paper', family: 'all' });
